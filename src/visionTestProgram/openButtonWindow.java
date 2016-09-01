@@ -1,4 +1,4 @@
-package gui;
+package visionTestProgram;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,12 +52,13 @@ public class openButtonWindow extends JFrame {
 		// Improve by using Iterator and list
 		readAndWriteCSV.readFromFile();
 		if (readAndWriteCSV.getValue() != null) {
-			guiMain.setHueMinValue(Integer.parseInt(readAndWriteCSV.readInNext()));
+			guiMain.setHueMinValue(Integer.parseInt(readAndWriteCSV.getValue()));
 			guiMain.setHueMaxValue(Integer.parseInt(readAndWriteCSV.readInNext()));
 			guiMain.setSaturationMinValue(Integer.parseInt(readAndWriteCSV.readInNext()));
 			guiMain.setSaturationMaxValue(Integer.parseInt(readAndWriteCSV.readInNext()));
-			guiMain.setLuminanceMinValue(Integer.parseInt(readAndWriteCSV.readInNext()));
-			guiMain.setLuminanceMaxValue(Integer.parseInt(readAndWriteCSV.readInNext()));
+			guiMain.setValueMinValue(Integer.parseInt(readAndWriteCSV.readInNext()));
+			guiMain.setValueMaxValue(Integer.parseInt(readAndWriteCSV.readInNext()));
+			readAndWriteCSV.resetCount();
 		}
 
 	}

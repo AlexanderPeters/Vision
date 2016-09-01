@@ -1,11 +1,11 @@
-package gui;
+package visionTestProgram;
 
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class createNewCSVFile {
 	static String fileName;
-	static String defaultLineOne = "HueMin, HueMax, SaturationMin, SaturationMax, LuminanceMin, LuminanceMax";
+	static String defaultLineOne = "HueMin, HueMax, SaturationMin, SaturationMax, ValueMin, ValueMax";
 
 	public static void setFileName(String name) {
 		fileName = name;

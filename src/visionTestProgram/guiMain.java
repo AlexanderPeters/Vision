@@ -1,4 +1,4 @@
-package gui;
+package visionTestProgram;
 
 //API Info
 //Group Layout API
@@ -12,12 +12,13 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
+//import java.io.IOException;
 import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class guiMain extends JFrame implements ActionListener, ChangeListener {
+public class guiMain extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private static final long serialVersionUID = 1L;
 
 	JButton buttonNew = new JButton("New");
@@ -25,33 +26,40 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 	JButton buttonSaveAs = new JButton("Save As");
 	JButton buttonExit = new JButton("Exit");
 
-	JTextField txtHueMin = new JTextField(3);
-	JTextField txtSaturationMin = new JTextField(3);
-	JTextField txtLuminanceMin = new JTextField(3);
-	JTextField txtHueMax = new JTextField(3);
-	JTextField txtSaturationMax = new JTextField(3);
-	JTextField txtLuminanceMax = new JTextField(3);
+	static JTextField txtHueMin = new JTextField(3);
+	static JTextField txtSaturationMin = new JTextField(3);
+	static JTextField txtValueMin = new JTextField(3);
+	static JTextField txtHueMax = new JTextField(3);
+	static JTextField txtSaturationMax = new JTextField(3);
+	static JTextField txtValueMax = new JTextField(3);
 
 	JLabel labelHueMin = new JLabel("Hue Min Filter Value");
 	JLabel labelHueMax = new JLabel("Hue Max Filter Value");
 	JLabel labelSaturationMin = new JLabel("Saturation Min Filter Value");
 	JLabel labelSaturationMax = new JLabel("Saturation Max Filter Value");
-	JLabel labelLuminanceMin = new JLabel("Luminance Min Filter Value");
-	JLabel labelLuminanceMax = new JLabel("Luminance Max Filter Value");
+	JLabel labelValueMin = new JLabel("Value Min Filter Value");
+	JLabel labelValueMax = new JLabel("Value Max Filter Value");
 
 	JLabel sldLabelHueMin = new JLabel("Hue Min Slider");
 	JLabel sldLabelHueMax = new JLabel("Hue Max Slider");
 	JLabel sldLabelSaturationMin = new JLabel("Saturation Min Slider");
 	JLabel sldLabelSaturationMax = new JLabel("Saturation Max Slider");
-	JLabel sldLabelLuminanceMin = new JLabel("Luminance Min Slider");
-	JLabel sldLabelLuminanceMax = new JLabel("Luminance Max Slider");
+	JLabel sldLabelValueMin = new JLabel("Value Min Slider");
+	JLabel sldLabelValueMax = new JLabel("Value Max Slider");
 
 	static JSlider sldHueMin = new JSlider(0, 255, 0);
 	static JSlider sldHueMax = new JSlider(0, 255, 0);
 	static JSlider sldSaturationMin = new JSlider(0, 255, 0);
 	static JSlider sldSaturationMax = new JSlider(0, 255, 0);
-	static JSlider sldLuminanceMin = new JSlider(0, 255, 0);
-	static JSlider sldLuminanceMax = new JSlider(0, 255, 0);
+	static JSlider sldValueMin = new JSlider(0, 255, 0);
+	static JSlider sldValueMax = new JSlider(0, 255, 0);
+
+	static String HueMinVal = "0";
+	static String HueMaxVal = "0";
+	static String SaturationMinVal = "0";
+	static String SaturationMaxVal = "0";
+	static String ValueMinVal = "0";
+	static String ValueMaxVal = "0";
 
 	JPanel panel = new JPanel();
 
@@ -59,6 +67,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 		guiMain fr = new guiMain();
 		centerFrame(fr);
 		fr.setVisible(true);
+
 	}
 
 	public guiMain() {
@@ -72,23 +81,29 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 		addtxtBox(txtHueMax);
 		addtxtBox(txtSaturationMin);
 		addtxtBox(txtSaturationMax);
-		addtxtBox(txtLuminanceMin);
-		addtxtBox(txtLuminanceMax);
+		addtxtBox(txtValueMin);
+		addtxtBox(txtValueMax);
 
 		addSlider(sldHueMin);
 		addSlider(sldHueMax);
 		addSlider(sldSaturationMin);
 		addSlider(sldSaturationMax);
-		addSlider(sldLuminanceMin);
-		addSlider(sldLuminanceMax);
+		addSlider(sldValueMin);
+		addSlider(sldValueMax);
+
+		sldHueMax.setValue(255);
+		sldSaturationMax.setValue(255);
+		sldValueMax.setValue(255);
+
+		addWindowListener(this);
 
 		GroupLayout layout = new GroupLayout(panel);
 
 		panel.setLayout(layout);
 
 		setSize(750, 325);
-		setTitle("HSL Values");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setTitle("HSV Values");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
@@ -96,23 +111,23 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelHueMin)
 						.addComponent(txtHueMin).addComponent(labelSaturationMin).addComponent(txtSaturationMin)
-						.addComponent(labelLuminanceMin).addComponent(txtLuminanceMin)
+						.addComponent(labelValueMin).addComponent(txtValueMin)
 
 				)
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(sldLabelHueMin)
 						.addComponent(sldHueMin).addComponent(sldLabelSaturationMin).addComponent(sldSaturationMin)
-						.addComponent(sldLabelLuminanceMin).addComponent(sldLuminanceMin))
+						.addComponent(sldLabelValueMin).addComponent(sldValueMin))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelHueMax)
 						.addComponent(txtHueMax).addComponent(labelSaturationMax).addComponent(txtSaturationMax)
-						.addComponent(labelLuminanceMax).addComponent(txtLuminanceMax))
+						.addComponent(labelValueMax).addComponent(txtValueMax))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 
 						.addComponent(sldLabelHueMax).addComponent(sldHueMax).addComponent(sldLabelSaturationMax)
-						.addComponent(sldSaturationMax).addComponent(sldLabelLuminanceMax)
-						.addComponent(sldLuminanceMax))
+						.addComponent(sldSaturationMax).addComponent(sldLabelValueMax)
+						.addComponent(sldValueMax))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(buttonNew)
 						.addComponent(buttonOpen).addComponent(buttonSaveAs).addComponent(buttonExit)));
@@ -134,12 +149,12 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 						.addComponent(sldSaturationMin).addComponent(txtSaturationMax).addComponent(sldSaturationMax)
 						.addComponent(buttonExit))// .addComponent(setDefaultDirectoryLabel))
 
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelLuminanceMin)
-						.addComponent(sldLabelLuminanceMin).addComponent(labelLuminanceMax)
-						.addComponent(sldLabelLuminanceMax))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelValueMin)
+						.addComponent(sldLabelValueMin).addComponent(labelValueMax)
+						.addComponent(sldLabelValueMax))
 
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(txtLuminanceMin)
-						.addComponent(sldLuminanceMin).addComponent(txtLuminanceMax).addComponent(sldLuminanceMax))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(txtValueMin)
+						.addComponent(sldValueMin).addComponent(txtValueMax).addComponent(sldValueMax))
 
 		);
 
@@ -168,24 +183,33 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 
 		} else if (e.getSource() == buttonExit) {
 			dispose();
+		}
 
-		} else if (e.getSource() == txtHueMin) {
-			sldHueMin.setValue(Integer.parseInt(txtHueMin.getText()));
+		else {
 
-		} else if (e.getSource() == txtHueMax) {
-			sldHueMax.setValue(Integer.parseInt(txtHueMax.getText()));
+			// } else if (e.getSource() == txtHueMin) {
+			sldHueMin.setValue(parseInt(txtHueMin.getText()));
+			HueMinVal = txtHueMin.getText();
 
-		} else if (e.getSource() == txtSaturationMin) {
-			sldSaturationMin.setValue(Integer.parseInt(txtSaturationMin.getText()));
+			// } else if (e.getSource() == txtHueMax) {
+			sldHueMax.setValue(parseInt(txtHueMax.getText()));
+			HueMaxVal = txtHueMax.getText();
 
-		} else if (e.getSource() == txtSaturationMax) {
-			sldSaturationMax.setValue(Integer.parseInt(txtSaturationMax.getText()));
+			// } else if (e.getSource() == txtSaturationMin) {
+			sldSaturationMin.setValue(parseInt(txtSaturationMin.getText()));
+			SaturationMinVal = txtSaturationMin.getText();
 
-		} else if (e.getSource() == txtLuminanceMin) {
-			sldLuminanceMin.setValue(Integer.parseInt(txtLuminanceMin.getText()));
+			// } else if (e.getSource() == txtSaturationMax) {
+			sldSaturationMax.setValue(parseInt(txtSaturationMax.getText()));
+			SaturationMaxVal = txtSaturationMax.getText();
 
-		} else if (e.getSource() == txtLuminanceMax) {
-			sldLuminanceMax.setValue(Integer.parseInt(txtLuminanceMax.getText()));
+			// } else if (e.getSource() == txtValueMin) {
+			sldValueMin.setValue(parseInt(txtValueMin.getText()));
+			ValueMinVal = txtValueMin.getText();
+
+			// } else if (e.getSource() == txtValueMax) {
+			sldValueMax.setValue(parseInt(txtValueMax.getText()));
+			ValueMaxVal = txtValueMax.getText();
 
 		}
 
@@ -196,12 +220,24 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 		txtHueMax.setText(String.valueOf(sldHueMax.getValue()));
 		txtSaturationMin.setText(String.valueOf(sldSaturationMin.getValue()));
 		txtSaturationMax.setText(String.valueOf(sldSaturationMax.getValue()));
-		txtLuminanceMin.setText(String.valueOf(sldLuminanceMin.getValue()));
-		txtLuminanceMax.setText(String.valueOf(sldLuminanceMax.getValue()));
+		txtValueMin.setText(String.valueOf(sldValueMin.getValue()));
+		txtValueMax.setText(String.valueOf(sldValueMax.getValue()));
+		HueMinVal = String.valueOf(sldHueMin.getValue());
+		HueMaxVal = String.valueOf(sldHueMax.getValue());
+		SaturationMinVal = String.valueOf(sldSaturationMin.getValue());
+		SaturationMaxVal = String.valueOf(sldSaturationMax.getValue());
+		ValueMinVal = String.valueOf(sldValueMin.getValue());
+		ValueMaxVal = String.valueOf(sldValueMax.getValue());
+
+	}
+
+	public static int parseInt(String s) {
+		return Integer.parseInt(s);
+
 	}
 
 	public static int getHueMinValue() {
-		return sldHueMin.getValue();
+		return parseInt(HueMinVal);
 	}
 
 	public static void setHueMinValue(int x) {
@@ -209,7 +245,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 	}
 
 	public static int getHueMaxValue() {
-		return sldHueMax.getValue();
+		return parseInt(HueMaxVal);
 	}
 
 	public static void setHueMaxValue(int x) {
@@ -217,7 +253,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 	}
 
 	public static int getSaturationMinValue() {
-		return sldSaturationMin.getValue();
+		return parseInt(SaturationMinVal);
 	}
 
 	public static void setSaturationMinValue(int x) {
@@ -225,27 +261,29 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 	}
 
 	public static int getSaturationMaxValue() {
-		return sldHueMax.getValue();
+		return parseInt(SaturationMaxVal);
 	}
 
 	public static void setSaturationMaxValue(int x) {
 		sldSaturationMax.setValue(x);
 	}
 
-	public static int getLuminanceMinValue() {
-		return sldLuminanceMin.getValue();
+	public static int getValueMinValue() {
+		return parseInt(ValueMinVal);
 	}
 
-	public static void setLuminanceMinValue(int x) {
-		sldLuminanceMin.setValue(x);
+	public static void setValueMinValue(int x) {
+		sldValueMin.setValue(x);
 	}
 
-	public static int getLuminanceMaxValue() {
-		return sldLuminanceMax.getValue();
+	public static int getValueMaxValue() {
+		// System.out.print(ValueMaxVal);
+		return parseInt(ValueMaxVal);
+
 	}
 
-	public static void setLuminanceMaxValue(int x) {
-		sldLuminanceMax.setValue(x);
+	public static void setValueMaxValue(int x) {
+		sldValueMax.setValue(x);
 	}
 
 	public void addSlider(JSlider s) {
@@ -265,5 +303,46 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener {
 	public void addtxtBox(JTextField s) {
 		s.setText("0");
 		s.addActionListener(this);
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+
 	}
 }

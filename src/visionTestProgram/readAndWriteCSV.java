@@ -1,4 +1,4 @@
-package gui;
+package visionTestProgram;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -58,7 +58,7 @@ public class readAndWriteCSV {
 			i = 0;
 		}
 
-		if (i < objects.size()) {
+		if (i <= objects.size()) {
 			String element = objects.get(i);
 			if (element == null || element == "Last") {
 				value = null;
@@ -107,6 +107,10 @@ public class readAndWriteCSV {
 		i++;
 		return getValue();
 
+	}
+
+	public static void resetCount() {
+		i = 0;
 	}
 
 	public static String readInPrevious() {

@@ -1,11 +1,14 @@
-package webcam;
+package visionTestProgram;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,6 +16,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
@@ -23,7 +27,7 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-
+import org.opencv.core.Size;
 
 class FacePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -58,141 +62,163 @@ class VisionProcessing {
 
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static Point targetcenter = null, imagecenter = null;
-	public static int yoffcenter, xoffcenter;
+	public static int y, x;
 	public static int recwidth;
+
+	public static int initGui = 0;
+	private final static Point point = new Point(-1, -1);
+	private final static Size size = new Size(3, 3);
 
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
 
 		Mat hierarchy = new Mat();
-		Mat mask = new Mat();
-		Mat image = new Mat();
+
 		Mat image2 = new Mat();
 		Mat image3 = new Mat();
+		Mat image4 = new Mat();
+		Mat image6 = new Mat();
 
-		Core.inRange(m, new Scalar(Integer.parseInt(Main.huetxt), Integer.parseInt(Main.luminancetxt), Integer.parseInt(Main.saturationtxt)), new Scalar(255, 255, 255), mask);
-		Core.bitwise_and(m, m, image, mask);
-		Imgproc.cvtColor(image, image2, Imgproc.COLOR_RGB2GRAY);
-		Imgproc.findContours(image2, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		// cvCvtColor();
+		if (initGui == 0) {
+			guiMain.main(null);// call gui once at start to get initialization
+								// values
 
+			initGui++;
+		}
+		Scalar low = new Scalar(guiMain.getHueMinValue(), guiMain.getValueMinValue(),
+				guiMain.getSaturationMinValue());
+		Scalar high = new Scalar(guiMain.getHueMaxValue(), guiMain.getValueMaxValue(),
+				guiMain.getSaturationMaxValue());
+
+		Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
+		Imgproc.cvtColor(m, frameHSV, Imgproc.COLOR_RGB2HSV);
+		Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
+		Core.inRange(frameHSV, low, high, frame_threshed);
+		Core.bitwise_and(frameHSV, frameHSV, image2, frame_threshed);
+		Imgproc.cvtColor(image2, image3, Imgproc.COLOR_HSV2RGB);
+		Imgproc.cvtColor(image3, image4, Imgproc.COLOR_RGB2GRAY);
+		//Imgproc.blur(image4, image4, size, point, Imgproc.BORDER_DEFAULT);
+
+		Imgproc.findContours(image4, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+		double recAreaLargest = 0;
+		Point recbr = null;
+		Point rectl = null;
 		for (Iterator<org.opencv.core.MatOfPoint> iterator = contours.iterator(); iterator.hasNext();) {
+
 			org.opencv.core.MatOfPoint matOfPoint = (MatOfPoint) iterator.next();
 			Rect rec = Imgproc.boundingRect(matOfPoint);
-			if (rec.height < 35 || rec.width < 35) {
-				iterator.remove();
-				continue;
+
+			if (rec.area() >= recAreaLargest) {
+				recAreaLargest = rec.area();
+				recbr = rec.br();
+				rectl = rec.tl();
+				// System.out.println("largest");
+
 			}
-			float aspect = (float) rec.width / (float) rec.height;
-			if (aspect < 1.0)
-				iterator.remove();
+			iterator.remove();
+
 		}
 
+		if (!(recbr == null) && !(rectl == null)){
+		Core.rectangle(image4, recbr, rectl, new Scalar(255, 255, 255));
+		recAreaLargest = 0;
+		recbr = null;
+		rectl = null;
+		}
 		if (contours.size() == 1) {
-			Rect rec = Imgproc.boundingRect(contours.get(0));
-			Core.rectangle(image2, rec.br(), rec.tl(), new Scalar(255, 255, 255));
-			targetcenter = new Point(rec.x + rec.width / 2, rec.y + rec.height / 2);
-			imagecenter = new Point(image2.width() / 2, image2.height() / 2);
-			recwidth = rec.width;
-
+			Rect recdisp = Imgproc.boundingRect(contours.get(0));
+			//System.out.println("test");
+			try{
+			Core.rectangle(image4, recdisp.br(), recdisp.tl(), new Scalar(255, 255, 255));
+			recAreaLargest = 0;
+			}
+			catch (NullPointerException e) {
+				e.printStackTrace();
+			}
 		}
+		Imgproc.cvtColor(image4, image6, Imgproc.COLOR_GRAY2RGB);
 
-		Imgproc.cvtColor(image2, image3, Imgproc.COLOR_GRAY2RGB);
-		return image3;
+		return image6;
 
 	}
 }
 
 public class Main implements ActionListener {
-	
-	public static String huetxt = "0";
-	public static String saturationtxt = "0";
-	public static String luminancetxt = "0";
-	static JPanel HSLValues = new JPanel();
-	JTextField txtHue;
-	JTextField txtSaturation;
-	JTextField txtLuminance;
-	
-	Main() {
-	
-	txtHue = new JTextField(5);
-	txtSaturation = new JTextField(5);
-	txtLuminance = new JTextField(5);
-	
-	
-    //setLayout(new FlowLayout());
-    //addWindowListener(this);
-    //b = new Button("Click me");
-    //add(b);
-    //add(text);
-    //b.addActionListener(this);
-	
-    
 
-	HSLValues.add("North", new Label("Hue Value"));
-	
-	
+	static JButton m = new JButton("Options");
 
-	HSLValues.add("South", txtHue);
-	txtHue.setText("0");
-	txtHue.addActionListener(this);
-	//frame.add("North", HSLValues);
-	
-	HSLValues.add("North", new Label("Saturation Value"));
-	HSLValues.add("South", txtSaturation);
-	txtSaturation.setText("0");
-	txtSaturation.addActionListener(this);
-	//
-
-	HSLValues.add("North", new Label("Luminance Value"));
-	HSLValues.add("South", txtLuminance);
-	txtLuminance.setText("0");
-	txtLuminance.addActionListener(this);
-	
+	public static void main(String[] args) throws InterruptedException, IOException {
+		Main fr = new Main();
 	}
 
-    
-	public static void main(String[] args) throws InterruptedException{
-		JFrame frame = new JFrame("WebCam Capture - Face detection");
-		
+	public Main() throws InterruptedException, IOException {
+		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
+		m.addActionListener(this);
+
 		FacePanel facePanel = new FacePanel();
 		frame.setLayout(new BorderLayout());
 		frame.setSize(400, 400);
 		frame.setBackground(Color.BLUE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//frame.add("Center", HSLValues);
-		//frame.add("South", HSLValues);
-		frame.setVisible(true);
-	    
+		JPanel n = new JPanel();
+
+		n.add(m);
+
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
 
-		//JFrame frame = new JFrame("WebCam Capture - Face detection");
-		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		
-
-		//frame.setSize(400, 400);
-		
 		frame.add(facePanel, BorderLayout.CENTER);
-		frame.add(HSLValues, BorderLayout.SOUTH);
+		frame.add(n, BorderLayout.EAST);
 		frame.setVisible(true);
 
 		Mat webcam_image = new Mat();
+		Mat imageGray = new Mat();
 		VideoCapture webCam = new VideoCapture(0);
 		Mat processed_image = new Mat();
+		//URL url = new URL("http://192.168.2.7/axis-cgi/jpg/image.cgi");
+		//BufferedImage image = ImageIO.read(url);
+		//BufferedImage image = myBufferedImage;
+		//byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		//Mat webcam_image = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+		//webcam_image.put(0, 0, data);
+
+		//webCam.open();
+		//IpCam.open("http://192.168.1.30:8080/?dummy=param.mjpg");
 
 		Mat displayable = new Mat();
+		int x = 0;
 
 		if (webCam.isOpened()) {
 			Thread.sleep(500);
 			while (true) {
+				
 				webCam.read(webcam_image);
 				if (!webcam_image.empty()) {
 					Thread.sleep(5);
 					processed_image = VisionProcessing.findHighGoal(webcam_image);
+					Scalar low = new Scalar(guiMain.getHueMinValue(), guiMain.getValueMinValue(),
+							guiMain.getSaturationMinValue());
+					Scalar high = new Scalar(guiMain.getHueMaxValue(), guiMain.getValueMaxValue(),
+							guiMain.getSaturationMaxValue());
+
+					Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
+					Imgproc.cvtColor(webcam_image, frameHSV, Imgproc.COLOR_RGB2HSV);
+					Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
+					Core.inRange(frameHSV, low, high, frame_threshed);
+					Mat image2 = new Mat();
+					Core.bitwise_and(frameHSV, frameHSV, image2, frame_threshed);
+					Mat image3 = new Mat();
+					Imgproc.cvtColor(image2, image3, Imgproc.COLOR_HSV2RGB);
+					Imgproc.cvtColor(image3, imageGray, Imgproc.COLOR_RGB2GRAY);
+					Imgproc.cvtColor(imageGray, webcam_image, Imgproc.COLOR_GRAY2RGB);
+
 					List<Mat> src = Arrays.asList(webcam_image, processed_image);
 					Core.hconcat(src, displayable);
-
-					frame.setSize(displayable.width() + 40, displayable.height() + 60);
+					if (x == 0) {// so we don't have to resize the frame every
+									// time through (performance gain).
+						frame.setSize(displayable.width() + 80, displayable.height() + 120);
+						x++;
+					}
 
 					facePanel.matToBufferedImage(displayable);
 					facePanel.repaint();
@@ -206,20 +232,17 @@ public class Main implements ActionListener {
 		webCam.release();
 		frame.dispose();
 		Thread.sleep(50);
-		main(args);
+		main(null);
 	}
-	
-
-	
-
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		huetxt = txtHue.getText();
-		saturationtxt = txtSaturation.getText();
-		luminancetxt = txtLuminance.getText();
-		// TODO Auto-generated method stub
-		
+	public void actionPerformed(ActionEvent e) {
+
+		if (e.getSource() == m) {
+
+			guiMain.main(null);
+		}
+
 	}
 
 }

@@ -1,4 +1,4 @@
-package gui;
+package visionTestProgram;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,8 +65,8 @@ public class saveAsButtonWindow extends JFrame {
 		readAndWriteCSV.setFileLocation(getPath());
 		readAndWriteCSV.writeStringToFile(defaultLineOne);
 		readAndWriteCSV.writeIntValuesToFile(guiMain.getHueMinValue(), guiMain.getHueMaxValue(),
-				guiMain.getSaturationMinValue(), guiMain.getSaturationMaxValue(), guiMain.getLuminanceMinValue(),
-				guiMain.getLuminanceMaxValue());
+				guiMain.getSaturationMinValue(), guiMain.getSaturationMaxValue(), guiMain.getValueMinValue(),
+				guiMain.getValueMaxValue());
 
 	}
 
