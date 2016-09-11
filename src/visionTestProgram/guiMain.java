@@ -25,7 +25,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 	JButton buttonOpen = new JButton("Open");
 	JButton buttonSaveAs = new JButton("Save As");
 	JButton buttonExit = new JButton("Exit");
-
+	JButton buttonDefaultDir = new JButton("Default Dir");
+	
 	static JTextField txtHueMin = new JTextField(3);
 	static JTextField txtSaturationMin = new JTextField(3);
 	static JTextField txtValueMin = new JTextField(3);
@@ -76,6 +77,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		buttonOpen.addActionListener(this);
 		buttonSaveAs.addActionListener(this);
 		buttonExit.addActionListener(this);
+		buttonDefaultDir.addActionListener(this);
 
 		addtxtBox(txtHueMin);
 		addtxtBox(txtHueMax);
@@ -126,11 +128,11 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 
 						.addComponent(sldLabelHueMax).addComponent(sldHueMax).addComponent(sldLabelSaturationMax)
-						.addComponent(sldSaturationMax).addComponent(sldLabelValueMax)
-						.addComponent(sldValueMax))
+						.addComponent(sldSaturationMax).addComponent(sldLabelValueMax).addComponent(sldValueMax))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(buttonNew)
-						.addComponent(buttonOpen).addComponent(buttonSaveAs).addComponent(buttonExit)));
+						.addComponent(buttonOpen).addComponent(buttonSaveAs).addComponent(buttonExit)
+						.addComponent(buttonDefaultDir)));
 
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelHueMin)
@@ -151,7 +153,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelValueMin)
 						.addComponent(sldLabelValueMin).addComponent(labelValueMax)
-						.addComponent(sldLabelValueMax))
+						.addComponent(sldLabelValueMax).addComponent(buttonDefaultDir))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(txtValueMin)
 						.addComponent(sldValueMin).addComponent(txtValueMax).addComponent(sldValueMax))
@@ -183,6 +185,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 		} else if (e.getSource() == buttonExit) {
 			dispose();
+		} else if (e.getSource() == buttonDefaultDir){
+			new defaultDirButtonWindow.main(null);
 		}
 
 		else {
