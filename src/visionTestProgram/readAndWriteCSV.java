@@ -51,6 +51,38 @@ public class readAndWriteCSV {
 			}
 		}
 	}
+	public static String readFromSettingsFile(){
+		String chosenLine = new String();
+		BufferedReader br = null;
+		try {
+
+			br = new BufferedReader(new FileReader(fileLocation));
+			List<String> lines = new ArrayList<>();
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				lines.add(line);
+			}
+
+			chosenLine = lines.get(0);
+			
+
+		} 
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return chosenLine;
+		
+	}
 
 	public static String getValue() {
 

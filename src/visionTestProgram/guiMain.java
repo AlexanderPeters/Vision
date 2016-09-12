@@ -12,6 +12,8 @@ package visionTestProgram;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.UnknownHostException;
 //import java.io.IOException;
 import java.util.Hashtable;
 
@@ -20,6 +22,8 @@ import javax.swing.event.*;
 
 public class guiMain extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private static final long serialVersionUID = 1L;
+	
+	static String settingsPath = new String("C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt");
 
 	JButton buttonNew = new JButton("New");
 	JButton buttonOpen = new JButton("Open");
@@ -161,6 +165,15 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		);
 
 		add("Center", panel);
+		try {
+			guiSettup.setFilePath(settingsPath);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void centerFrame(JFrame fr) {
@@ -186,7 +199,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		} else if (e.getSource() == buttonExit) {
 			dispose();
 		} else if (e.getSource() == buttonDefaultDir){
-			new defaultDirButtonWindow.main(null);
+			dispose();
+			defaultDirButtonWindow.main(null);
 		}
 
 		else {
