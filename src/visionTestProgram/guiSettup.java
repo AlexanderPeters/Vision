@@ -4,7 +4,6 @@ package visionTestProgram;
 	import java.io.File;
 	import java.io.IOException;
 	import java.net.UnknownHostException;
-	import javax.swing.JFileChooser;
 	import javax.swing.JFrame;
 
 	public class guiSettup extends JFrame {
@@ -18,8 +17,12 @@ package visionTestProgram;
 			
 			readAndWriteCSV.setFileLocation(path);
 			String defaultDir = readAndWriteCSV.readFromSettingsFile();
-			readAndWriteCSV.setFileLocation(defaultDir);
-			readInValues();
+			File tempDefaultDirChecker = new File(defaultDir);
+			if (tempDefaultDirChecker.exists() && tempDefaultDirChecker.length() != 0){
+				readAndWriteCSV.setFileLocation(defaultDir);
+				readInValues();
+			}
+			
 			
 		}
 		

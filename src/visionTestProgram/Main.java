@@ -192,6 +192,7 @@ public class Main implements ActionListener {
 	}
 
 	public Main() throws InterruptedException, IOException {
+		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
@@ -281,5 +282,6 @@ public class Main implements ActionListener {
 		}
 
 	}
+	
 
 }

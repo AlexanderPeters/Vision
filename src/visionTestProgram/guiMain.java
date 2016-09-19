@@ -12,6 +12,7 @@ package visionTestProgram;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 //import java.io.IOException;
@@ -23,8 +24,8 @@ import javax.swing.event.*;
 public class guiMain extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private static final long serialVersionUID = 1L;
 	
-	static String settingsPath = new String("C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt");
-
+	static String settingsPath = new String();
+	
 	JButton buttonNew = new JButton("New");
 	JButton buttonOpen = new JButton("Open");
 	JButton buttonSaveAs = new JButton("Save As");
@@ -67,6 +68,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 	static String ValueMaxVal = "0";
 
 	JPanel panel = new JPanel();
+	int timesLooped = 0;
 
 	public static void main(String[] args) {
 		guiMain fr = new guiMain();
@@ -165,15 +167,29 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		);
 
 		add("Center", panel);
-		try {
-			guiSettup.setFilePath(settingsPath);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		if (OSValidator.isWindows()){
+			settingsPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
+		} else if (OSValidator.isUnix()){			
+			settingsPath = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";		
 		}
+		
+		if (timesLooped == 0){
+			timesLooped++;
+			File tempDirChecker = new File(settingsPath);
+			if (tempDirChecker.exists() && tempDirChecker.length() != 0){
+				try {
+					guiSettup.setFilePath(settingsPath);
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 	private static void centerFrame(JFrame fr) {

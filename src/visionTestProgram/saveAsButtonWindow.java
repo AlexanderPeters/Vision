@@ -17,7 +17,13 @@ public class saveAsButtonWindow extends JFrame {
 	JFileChooser fc = new JFileChooser();
 
 	public saveAsButtonWindow() {
-		String defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";
+		String defaultPath = new String();
+		
+		if (OSValidator.isWindows()){
+			defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";
+		} else if (OSValidator.isUnix()){			
+			defaultPath = "/home/debian/Desktop";		
+		}
 
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter textFilter = new FileNameExtensionFilter("Text files", "txt");

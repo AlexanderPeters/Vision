@@ -72,15 +72,22 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == saveButton){
-			userInputTxt = ("C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\" + formatPath() + ".txt");
+		if (e.getSource() == saveButton && !userInput.getText().isEmpty()) {
+			String userInputTxt = new String();
+
+			if (OSValidator.isWindows()) {
+				userInputTxt = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\" + formatPath() + ".txt";
+			} else if (OSValidator.isUnix()) {
+				userInputTxt = "/home/debian/Desktop/" + formatPath() + ".txt";
+			}
+
 			createNewSettingsFile.setDirPath(userInputTxt);
 			createNewSettingsFile.createNewFile();
 			userInput.setText(null);
 			dispose();
-			
+
 		}
-		
+
 	}
 
 	@Override

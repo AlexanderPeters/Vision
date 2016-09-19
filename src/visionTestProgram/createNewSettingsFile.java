@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class createNewSettingsFile {
-	static String fileName = new String("C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt");
+	static String fileName = new String();
 	static String dirPath = new String();
 	
 	public static void setDirPath(String path){
@@ -25,6 +25,11 @@ public class createNewSettingsFile {
 	}
 
 	public static void createBaseConfig() {
+		if (OSValidator.isWindows()){
+			fileName = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
+		} else if (OSValidator.isUnix()){			
+			fileName = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";		
+		}
 		readAndWriteCSV.setFileLocation(fileName);
 		try {
 			readAndWriteCSV.writeStringToFile(dirPath);
