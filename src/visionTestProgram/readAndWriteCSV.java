@@ -51,7 +51,8 @@ public class readAndWriteCSV {
 			}
 		}
 	}
-	public static String readFromSettingsFile(){
+
+	public static String readFromSettingsFile() {
 		String chosenLine = new String();
 		BufferedReader br = null;
 		try {
@@ -64,10 +65,8 @@ public class readAndWriteCSV {
 			}
 
 			chosenLine = lines.get(0);
-			
 
-		} 
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -81,7 +80,7 @@ public class readAndWriteCSV {
 			}
 		}
 		return chosenLine;
-		
+
 	}
 
 	public static String getValue() {
@@ -92,12 +91,10 @@ public class readAndWriteCSV {
 
 		if (i <= objects.size()) {
 			String element = objects.get(i);
-			if (element == null || element == "Last") {
+			if (element == null || element == "Last")
 				value = null;
-			} else if (element != null && element != "Last") {
+			else if (element != null && element != "Last")
 				value = element;
-			}
-
 		}
 		return value;
 	}

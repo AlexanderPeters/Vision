@@ -18,12 +18,11 @@ public class saveAsButtonWindow extends JFrame {
 
 	public saveAsButtonWindow() {
 		String defaultPath = new String();
-		
-		if (OSValidator.isWindows()){
+
+		if (OSValidator.isWindows())
 			defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";
-		} else if (OSValidator.isUnix()){			
-			defaultPath = "/home/debian/Desktop";		
-		}
+		else if (OSValidator.isUnix())
+			defaultPath = "/home/debian/Desktop";
 
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter textFilter = new FileNameExtensionFilter("Text files", "txt");
@@ -51,12 +50,12 @@ public class saveAsButtonWindow extends JFrame {
 	}
 
 	public static String getPath() {
-		String extension = filePath.substring(filePath.lastIndexOf(".") +1 , filePath.length());
+		String extension = filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
 		String filePlusExt = filePath + ".txt";
 
 		if (!extension.equals("txt")) {
 			return filePlusExt;
-			
+
 		} else {
 			return filePath;
 		}

@@ -60,25 +60,22 @@ public class newButtonWindow extends JFrame implements ActionListener, WindowLis
 				userInput.getText().length());
 		String fileMinusExt = userInput.getText().replaceAll(".txt", "");
 
-		if (extension.equals("txt")) {
+		if (extension.equals("txt"))
 			return fileMinusExt;
-
-		} else {
+		else
 			return userInput.getText();
-		}
-
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveButton) {
 			String userInputTxt = new String();
-			
-			if (OSValidator.isWindows()){
+
+			if (OSValidator.isWindows())
 				userInputTxt = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\" + formatPath() + ".txt";
-			} else if (OSValidator.isUnix()){			
-				userInputTxt = "/home/debian/Desktop/" + formatPath() + ".txt";		
-			}			
+			else if (OSValidator.isUnix())
+				userInputTxt = "/home/debian/Desktop/" + formatPath() + ".txt";
+
 			createNewCSVFile.setFileName(userInputTxt);
 			createNewCSVFile.createNewFile();
 			userInput.setText(null);

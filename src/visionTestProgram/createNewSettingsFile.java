@@ -6,15 +6,20 @@ import java.io.IOException;
 public class createNewSettingsFile {
 	static String fileName = new String();
 	static String dirPath = new String();
-	
-	public static void setDirPath(String path){
+
+	public static void setDirPath(String path) {
 		dirPath = path;
-		
+
 	}
-	
+
 	@SuppressWarnings("resource")
 	public static void createNewFile() {
 		try {
+			if (OSValidator.isWindows())
+				fileName = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
+			else if (OSValidator.isUnix())
+				fileName = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";
+
 			new FileWriter(fileName);
 			createBaseConfig();
 		}
@@ -25,15 +30,11 @@ public class createNewSettingsFile {
 	}
 
 	public static void createBaseConfig() {
-		if (OSValidator.isWindows()){
-			fileName = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
-		} else if (OSValidator.isUnix()){			
-			fileName = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";		
-		}
+
 		readAndWriteCSV.setFileLocation(fileName);
 		try {
 			readAndWriteCSV.writeStringToFile(dirPath);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

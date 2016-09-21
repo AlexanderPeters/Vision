@@ -57,7 +57,7 @@ class VisionProcessing {
 
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static int initGui = 0;
-	
+
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
 
 		Mat hierarchy = new Mat();
@@ -67,35 +67,35 @@ class VisionProcessing {
 		Mat image6 = new Mat();
 		Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
 		Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
-		
+
 		Scalar low = new Scalar(guiMain.getHueMinValue(), guiMain.getValueMinValue(), guiMain.getSaturationMinValue());
 		Scalar high = new Scalar(guiMain.getHueMaxValue(), guiMain.getValueMaxValue(), guiMain.getSaturationMaxValue());
 
 		double recAreaLargest = 0;
 		Point recbr = null;
 		Point rectl = null;
-		
+
 		int recwidth = 0, recheight = 0;
 		int imagewidth, imageheight;
-		
+
 		if (initGui == 0) {
-			guiMain.main(null);// call gui once at start to get initialization values
+			guiMain.main(null);// call gui once at start to get initialization
+								// values
 			initGui++;
 		}
-				
+
 		Imgproc.cvtColor(m, frameHSV, Imgproc.COLOR_RGB2HSV);
 		imagewidth = m.cols();
 		imageheight = m.rows();
-		
+
 		Core.inRange(frameHSV, low, high, frame_threshed);
 		Core.bitwise_and(frameHSV, frameHSV, image2, frame_threshed);
-		
+
 		Imgproc.cvtColor(image2, image3, Imgproc.COLOR_HSV2RGB);
 		Imgproc.cvtColor(image3, image4, Imgproc.COLOR_RGB2GRAY);
-		
+
 		Imgproc.findContours(image4, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-		
 		for (Iterator<org.opencv.core.MatOfPoint> iterator = contours.iterator(); iterator.hasNext();) {
 
 			org.opencv.core.MatOfPoint matOfPoint = (MatOfPoint) iterator.next();
@@ -121,11 +121,9 @@ class VisionProcessing {
 			rectl = null;
 			recwidth = 0;
 			recheight = 0;
-						
-		} else {
+
+		} else
 			math(goalCenter(-1, -1, -1, -1), imagewidth, imageheight, -1, -1);
-			
-		}
 
 		Imgproc.cvtColor(image4, image6, Imgproc.COLOR_GRAY2RGB);
 
@@ -146,58 +144,81 @@ class VisionProcessing {
 
 		}
 		return centerPoint;
-		
+
 	}
-	public static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight){
-		double realGoalWidth = 12 + (8/12);//goal width in inches not pixels
-		double realGoalHeight = 12 + (2/12);//goal height in inches not pixels
-		double distance;//distance to goal in ft
-		double camFieldOfView = 60;//FOV of a microsoft lifecam 3000 in degrees
-		double xOffsetFt;//width offset in width
-		double yOffsetFt;//height offset in ft
-		if(targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1){
-		distance = realGoalWidth/12*imageWidth/(2*goalWidth*Math.tan(camFieldOfView));
-		//System.out.println("dist " + distance);
-		//System.out.println("x " + targetCenter.x + " y " + targetCenter.y);
-		//System.out.print("xoff " + (targetCenter.x - imageWidth/2 + " "));
-		//System.out.println("yoff " + (imageHeight/2 - targetCenter.y));
-		xOffsetFt = (targetCenter.x - imageWidth/2) / (goalWidth/realGoalWidth);//pixels per ft
-		yOffsetFt = (imageHeight/2 - targetCenter.y) / (goalHeight/realGoalHeight);//multiplies the pixel height
-		//System.out.println(xOffsetFt + " " + yOffsetFt);												   //offset by an appropriate scalar
-		
-		//System.out.println(distance);
-		xOffset(distance, xOffsetFt);
-		yOffset(distance, yOffsetFt);
+
+	public static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
+		double realGoalWidth = 12 + (8 / 12);// goal width in inches not pixels
+		double realGoalHeight = 12 + (2 / 12);// goal height in inches not
+												// pixels
+		double distance;// distance to goal in ft
+		double camFieldOfView = 60;// FOV of a microsoft lifecam 3000 in degrees
+		double xOffsetFt;// width offset in width
+		double yOffsetFt;// height offset in ft
+		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
+			distance = realGoalWidth / 12 * imageWidth / (2 * goalWidth * Math.tan(camFieldOfView));
+			// System.out.println("dist " + distance);
+			// System.out.println("x " + targetCenter.x + " y " +
+			// targetCenter.y);
+			// System.out.print("xoff " + (targetCenter.x - imageWidth/2 + "
+			// "));
+			// System.out.println("yoff " + (imageHeight/2 - targetCenter.y));
+			xOffsetFt = (targetCenter.x - imageWidth / 2) / (goalWidth / realGoalWidth);// pixels
+																						// per
+																						// ft
+			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / realGoalHeight);// multiplies
+																							// the
+																							// pixel
+																							// height
+			// System.out.println(xOffsetFt + " " + yOffsetFt); //offset by an
+			// appropriate scalar
+
+			// System.out.println(distance);
+			xOffset(distance, xOffsetFt);
+			yOffset(distance, yOffsetFt);
 		}
 	}
-	public static void xOffset(double distance, double xOffsetFt){
-		//System.out.print("x " + xOffsetFt + " ");
-		System.out.print("x " + -Math.toDegrees(Math.atan(xOffsetFt / distance)) + " ");//negative angles to account for positive offsets
-		
-	
+
+	public static void xOffset(double distance, double xOffsetFt) {
+		// System.out.print("x " + xOffsetFt + " ");
+		System.out.print("x " + -Math.toDegrees(Math.atan(xOffsetFt / distance)) + " ");// negative
+																						// angles
+																						// to
+																						// account
+																						// for
+																						// positive
+																						// offsets
+
 	}
-	public static void yOffset(double distance, double yOffsetFt){
-		//System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
-		System.out.println("y " + -Math.toDegrees(Math.atan(yOffsetFt / distance)));//negative angles to account for positive offsets
-		
+
+	public static void yOffset(double distance, double yOffsetFt) {
+		// System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
+		System.out.println("y " + -Math.toDegrees(Math.atan(yOffsetFt / distance)));// negative
+																					// angles
+																					// to
+																					// account
+																					// for
+																					// positive
+																					// offsets
+
 	}
 }
 
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
-	
+
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
 		Main main = new Main();
 	}
 
 	public Main() throws InterruptedException, IOException {
-		
+
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
+
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
 		JPanel mainPanel = new JPanel();
-		
+
 		optionsButton.addActionListener(this);
 
 		FacePanel facePanel = new FacePanel();
@@ -205,7 +226,7 @@ public class Main implements ActionListener {
 		frame.setSize(400, 400);
 		frame.setBackground(Color.BLUE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		mainPanel.add(optionsButton);
 
 		frame.add(facePanel, BorderLayout.CENTER);
@@ -215,9 +236,9 @@ public class Main implements ActionListener {
 		Mat webcam_image = new Mat();
 		Mat imageGray = new Mat();
 		Mat processed_image = new Mat();
-		
+
 		VideoCapture webCam = new VideoCapture(0);
-		
+
 		int i = 0;
 
 		if (webCam.isOpened()) {
@@ -232,26 +253,26 @@ public class Main implements ActionListener {
 				webCam.read(webcam_image);
 				if (!webcam_image.empty()) {
 					Thread.sleep(5);
-					
+
 					processed_image = VisionProcessing.findHighGoal(webcam_image);
-					
+
 					Scalar low = new Scalar(guiMain.getHueMinValue(), guiMain.getValueMinValue(),
 							guiMain.getSaturationMinValue());
 					Scalar high = new Scalar(guiMain.getHueMaxValue(), guiMain.getValueMaxValue(),
 							guiMain.getSaturationMaxValue());
 
 					Imgproc.cvtColor(webcam_image, frameHSV, Imgproc.COLOR_RGB2HSV);
-					
+
 					Core.inRange(frameHSV, low, high, frame_threshed);
 					Core.bitwise_and(frameHSV, frameHSV, image2, frame_threshed);
-					
+
 					Imgproc.cvtColor(image2, image3, Imgproc.COLOR_HSV2RGB);
 					Imgproc.cvtColor(image3, imageGray, Imgproc.COLOR_RGB2GRAY);
 					Imgproc.cvtColor(imageGray, webcam_image, Imgproc.COLOR_GRAY2RGB);
 
 					List<Mat> src = Arrays.asList(webcam_image, processed_image);
 					Core.hconcat(src, displayable);
-					
+
 					if (i == 0) {// so we don't have to resize the frame every
 									// time through (performance gain).
 						frame.setSize(displayable.width() + 80, displayable.height() + 120);
@@ -261,7 +282,7 @@ public class Main implements ActionListener {
 					facePanel.matToBufferedImage(displayable);
 					facePanel.repaint();
 				} else {
-					
+
 					System.out.println(" --(!) No captured frame from webcam !");
 					break;
 				}
@@ -276,12 +297,9 @@ public class Main implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if (e.getSource() == optionsButton) {
-
+		if (e.getSource() == optionsButton)
 			guiMain.main(null);
-		}
 
 	}
-	
 
 }

@@ -16,12 +16,11 @@ public class openButtonWindow extends JFrame {
 
 	public openButtonWindow() {
 		String defaultPath = new String();
-		
-		if (OSValidator.isWindows()){
+
+		if (OSValidator.isWindows())
 			defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";
-		} else if (OSValidator.isUnix()){			
-			defaultPath = "/home/debian/Desktop";		
-		}
+		else if (OSValidator.isUnix())
+			defaultPath = "/home/debian/Desktop";
 
 		JFileChooser fc = new JFileChooser();
 
