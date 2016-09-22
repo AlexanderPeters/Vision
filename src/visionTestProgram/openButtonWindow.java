@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class openButtonWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -17,14 +18,17 @@ public class openButtonWindow extends JFrame {
 	public openButtonWindow() {
 		String defaultPath = new String();
 
-		if (OSValidator.isWindows())
-			defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";
-		else if (OSValidator.isUnix())
-			defaultPath = "/home/debian/Desktop";
+		if (OSValidator.isWindows()){
+			defaultPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop";}
+		else if (OSValidator.isUnix()){
+			defaultPath = "/home/debian/Desktop";}
 
 		JFileChooser fc = new JFileChooser();
+		FileNameExtensionFilter textFilter = new FileNameExtensionFilter("Text files", "txt");
 
 		fc.setCurrentDirectory(new File(defaultPath));
+		fc.addChoosableFileFilter(textFilter);
+		fc.setAcceptAllFileFilterUsed(false);
 
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fc.getSelectedFile();
@@ -32,7 +36,7 @@ public class openButtonWindow extends JFrame {
 			try {
 				filePath = selectedFile.getCanonicalPath();
 				shortFileName = selectedFile.getName();
-				readAndWriteCSV.setFileLocation(getPath());
+				
 				readInValues();
 
 			} catch (UnknownHostException e) {
@@ -46,7 +50,15 @@ public class openButtonWindow extends JFrame {
 	}
 
 	public static String getPath() {
-		return filePath;
+		String extension = filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
+		String filePlusExt = filePath + ".txt";
+
+		if (!extension.equals("txt")) {
+			return filePlusExt;
+
+		} else {
+			return filePath;
+		}
 	}
 
 	public static String getShortName() {
@@ -55,6 +67,7 @@ public class openButtonWindow extends JFrame {
 
 	private void readInValues() {
 		// Improve by using Iterator and list
+		readAndWriteCSV.setFileLocation(getPath());
 		readAndWriteCSV.readFromFile();
 		if (readAndWriteCSV.getValue() != null) {
 			guiMain.setHueMinValue(Integer.parseInt(readAndWriteCSV.getValue()));
@@ -64,6 +77,7 @@ public class openButtonWindow extends JFrame {
 			guiMain.setValueMinValue(Integer.parseInt(readAndWriteCSV.readInNext()));
 			guiMain.setValueMaxValue(Integer.parseInt(readAndWriteCSV.readInNext()));
 			readAndWriteCSV.resetCount();
+			
 		}
 
 	}

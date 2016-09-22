@@ -168,11 +168,11 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 		add("Center", panel);
 
-		if (OSValidator.isWindows())
+		if (OSValidator.isWindows()) {
 			settingsPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
-		else if (OSValidator.isUnix())
+		} else if (OSValidator.isUnix()) {
 			settingsPath = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";
-
+		}
 		if (timesLooped == 0) {
 			timesLooped++;
 			File tempDirChecker = new File(settingsPath);
@@ -205,15 +205,17 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 			dispose();
 			newButtonWindow.main(null);
 
-		} else if (e.getSource() == buttonOpen)
+		} else if (e.getSource() == buttonOpen) {
 			new openButtonWindow();
+		}
 
-		else if (e.getSource() == buttonSaveAs)
+		else if (e.getSource() == buttonSaveAs) {
 			new saveAsButtonWindow();
+		}
 
-		else if (e.getSource() == buttonExit)
+		else if (e.getSource() == buttonExit) {
 			dispose();
-		else if (e.getSource() == buttonDefaultDir) {
+		} else if (e.getSource() == buttonDefaultDir) {
 			dispose();
 			defaultDirButtonWindow.main(null);
 		} else {

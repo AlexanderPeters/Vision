@@ -15,11 +15,11 @@ public class createNewSettingsFile {
 	@SuppressWarnings("resource")
 	public static void createNewFile() {
 		try {
-			if (OSValidator.isWindows())
+			if (OSValidator.isWindows()) {
 				fileName = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
-			else if (OSValidator.isUnix())
+			} else if (OSValidator.isUnix()) {
 				fileName = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";
-
+			}
 			new FileWriter(fileName);
 			createBaseConfig();
 		}

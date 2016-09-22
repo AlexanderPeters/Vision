@@ -19,6 +19,7 @@ public class guiSettup extends JFrame {
 		if (tempDefaultDirChecker.exists() && tempDefaultDirChecker.length() != 0) {
 			readAndWriteCSV.setFileLocation(defaultDir);
 			readInValues();
+			
 		}
 
 	}

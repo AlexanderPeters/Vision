@@ -46,8 +46,9 @@ class FacePanel extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if (this.image == null)
+		if (this.image == null) {
 			return;
+		}
 		g.drawImage(this.image, 10, 10, this.image.getWidth(), this.image.getHeight(), null);
 	}
 
@@ -122,8 +123,9 @@ class VisionProcessing {
 			recwidth = 0;
 			recheight = 0;
 
-		} else
+		} else {
 			math(goalCenter(-1, -1, -1, -1), imagewidth, imageheight, -1, -1);
+		}
 
 		Imgproc.cvtColor(image4, image6, Imgproc.COLOR_GRAY2RGB);
 
@@ -297,8 +299,9 @@ public class Main implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if (e.getSource() == optionsButton)
+		if (e.getSource() == optionsButton) {
 			guiMain.main(null);
+		}
 
 	}
 

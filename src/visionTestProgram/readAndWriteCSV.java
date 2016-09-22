@@ -31,11 +31,12 @@ public class readAndWriteCSV {
 			String chosenLine = lines.get(1);
 			String[] values = chosenLine.split(",");
 			int loop = 0;
-
+			
 			while (!values[loop].equals("Last")) {
 				objects.add(values[loop]);
 				loop++;
 			}
+			
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -51,6 +52,7 @@ public class readAndWriteCSV {
 			}
 		}
 	}
+	
 
 	public static String readFromSettingsFile() {
 		String chosenLine = new String();
@@ -91,11 +93,13 @@ public class readAndWriteCSV {
 
 		if (i <= objects.size()) {
 			String element = objects.get(i);
-			if (element == null || element == "Last")
+			if (element == null || element == "Last") {
 				value = null;
-			else if (element != null && element != "Last")
+			} else if (element != null && element != "Last") {
 				value = element;
+			}
 		}
+
 		return value;
 	}
 
@@ -140,6 +144,7 @@ public class readAndWriteCSV {
 
 	public static void resetCount() {
 		i = 0;
+		objects = new ArrayList<>();
 	}
 
 	public static String readInPrevious() {
