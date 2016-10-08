@@ -170,6 +170,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 		if (OSValidator.isWindows()) {
 			settingsPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\DefaultDirOfSettingsFile.txt";
+			System.out.println(settingsPath);
 		} else if (OSValidator.isUnix()) {
 			settingsPath = "/home/debian/Desktop/DefaultDirOfSettingsFile.txt";
 		}

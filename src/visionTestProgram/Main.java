@@ -258,7 +258,7 @@ public class Main implements ActionListener {
 		int i = 0;
 
 		if (webCam.isOpened()) {
-			Thread.sleep(500);
+			Thread.sleep(1000);//Half a second works just fine for init on more power full computers 1s necessary for kangaroo
 			while (true) {
 				Mat displayable = new Mat();
 				Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
