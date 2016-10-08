@@ -26,7 +26,7 @@ public class OSValidator {
 		} else if (isMac()) {
 			return "osx";
 		} else if (isUnix()) {
-			return "uni";
+			return "unix";
 		} else if (isSolaris()) {
 			return "sol";
 		} else {

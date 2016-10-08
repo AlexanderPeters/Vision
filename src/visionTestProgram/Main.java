@@ -208,6 +208,7 @@ class VisionProcessing {
 
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
+	static boolean mycontinue = false;
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
@@ -215,9 +216,22 @@ public class Main implements ActionListener {
 	}
 
 	public Main() throws InterruptedException, IOException {
-
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
+		//LoadLibrary.loadOpenCV();
+		System.out.println(OSValidator.getOS());
+		if(OSValidator.isWindows()){
+			System.out.println("Is windows!!");
+			Runtime.getRuntime().loadLibrary("opencv_java2413");
+			//System.loadLibrary("opencv_java2413");
+		}//Core.NATIVE_LIBRARY_NAME);
+		else if(OSValidator.isUnix()){
+			System.out.println("Is Linux!!");
+			Runtime.getRuntime().loadLibrary("libopencv_core");
+			//System.load("libopencv_core");
+		}
+		//while(mycontinue != true){
+			//Thread.sleep(100);
+		//}
+        //Thread.sleep(100);
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
 		JPanel mainPanel = new JPanel();
 
