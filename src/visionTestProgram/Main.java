@@ -23,6 +23,8 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
 
 class FacePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -58,6 +60,8 @@ class VisionProcessing {
 
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static int initGui = 0;
+	
+	static NetworkTable table;
 
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
 
@@ -159,9 +163,12 @@ class VisionProcessing {
 		double xOffsetFt;// width offset in width
 		double yOffsetFt;// height offset in ft
 		
+		table = NetworkTable.getTable("datatable");
+		
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
 			
 			distance = realGoalWidth / 12 * imageWidth / (2 * goalWidth * Math.tan(camFieldOfView));
+			table.putNumber("Distance", distance);
 			
 			xOffsetFt = (targetCenter.x - imageWidth / 2) / (goalWidth / realGoalWidth);
 			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / realGoalHeight);
@@ -175,14 +182,18 @@ class VisionProcessing {
 		// System.out.print("x " + xOffsetFt + " ");
 		
 		// negative angles to account for positive offsets
-		System.out.print("x " + -Math.toDegrees(Math.atan(xOffsetFt / distance)) + " ");
+		double x = -Math.toDegrees(Math.atan(xOffsetFt / distance));
+		System.out.print("X " + x);
+		table.putNumber("X", x);
 	}
 
 	public static void yOffset(double distance, double yOffsetFt) {
 		// System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
 		
 		// negative angles to account for positive offsets
-		System.out.println("y " + -Math.toDegrees(Math.atan(yOffsetFt / distance)));
+		double y = -Math.toDegrees(Math.atan(yOffsetFt / distance));
+		System.out.println("Y " + y);
+		table.putNumber("Y", y);
 
 	}
 }
@@ -190,19 +201,20 @@ class VisionProcessing {
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
 	static boolean mycontinue = false;
-
+	
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
 		Main main = new Main();
 	}
 
 	public Main() throws InterruptedException, IOException {
-		//Core.NATIVE_LIBRARY_NAME);
+		//System.load(Core.NATIVE_LIBRARY_NAME);
 		//System.load("opencv_java2413");
 		System.out.println(OSValidator.getOS());
 		if(OSValidator.isWindows()){
 			System.out.println("Is windows!!");
 			Runtime.getRuntime().loadLibrary("opencv_java2413");
+			//Runtime.getRuntime().loadLibrary("NetworkTables");
 		
 		}
 		else if(OSValidator.isUnix()){
@@ -210,7 +222,7 @@ public class Main implements ActionListener {
 			Runtime.getRuntime().loadLibrary("libopencv_core");
 			
 		}
-		
+				
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
 		JPanel mainPanel = new JPanel();
 
