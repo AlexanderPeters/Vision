@@ -23,7 +23,7 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import java.net.*;
 
 
 class FacePanel extends JPanel {
@@ -61,7 +61,7 @@ class VisionProcessing {
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static int initGui = 0;
 	
-	static NetworkTable table;
+	//static NetworkTable table;
 
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
 
@@ -163,12 +163,17 @@ class VisionProcessing {
 		double xOffsetFt;// width offset in width
 		double yOffsetFt;// height offset in ft
 		
-		table = NetworkTable.getTable("datatable");
+		//table = NetworkTable.getTable("datatable");
 		
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
 			
 			distance = realGoalWidth / 12 * imageWidth / (2 * goalWidth * Math.tan(camFieldOfView));
-			table.putNumber("Distance", distance);
+			try {
+				comms("Distance", distance);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			xOffsetFt = (targetCenter.x - imageWidth / 2) / (goalWidth / realGoalWidth);
 			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / realGoalHeight);
@@ -177,14 +182,19 @@ class VisionProcessing {
 			yOffset(distance, yOffsetFt);
 		}
 	}
-
+	
 	public static void xOffset(double distance, double xOffsetFt) {
 		// System.out.print("x " + xOffsetFt + " ");
 		
 		// negative angles to account for positive offsets
 		double x = -Math.toDegrees(Math.atan(xOffsetFt / distance));
 		System.out.print("X " + x);
-		table.putNumber("X", x);
+		try {
+			comms("X", x);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void yOffset(double distance, double yOffsetFt) {
@@ -193,8 +203,26 @@ class VisionProcessing {
 		// negative angles to account for positive offsets
 		double y = -Math.toDegrees(Math.atan(yOffsetFt / distance));
 		System.out.println("Y " + y);
-		table.putNumber("Y", y);
+		try {
+			comms("Y", y);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
+	}
+
+	public static void comms(String str, Double val) throws IOException {
+		DatagramSocket clientSocket = new DatagramSocket();
+		InetAddress IPAddress = InetAddress.getByName("localhost");
+		byte[] sendData = new byte[1024];
+		
+		String sentence = str.concat(String.valueOf(val));
+		sendData = sentence.getBytes();
+		
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
+		clientSocket.send(sendPacket);
+		clientSocket.close();
 	}
 }
 
@@ -247,7 +275,8 @@ public class Main implements ActionListener {
 		VideoCapture webCam = new VideoCapture(0);
 
 		int i = 0;
-
+		
+        
 		if (webCam.isOpened()) {
 			//Half a second works just fine for init on more powerful 
 			//computers 700ms necessary for kangaroo computer
@@ -291,6 +320,7 @@ public class Main implements ActionListener {
 						facePanel.matToBufferedImage(displayable);
 						facePanel.repaint();
 					}
+					
 				} else {
 
 					System.out.println(" --(!) No captured frame from webcam !");
