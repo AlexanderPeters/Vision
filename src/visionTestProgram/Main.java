@@ -211,7 +211,7 @@ class VisionProcessing {
 		}
 
 	}
-
+	//https://systembash.com/a-simple-java-udp-server-and-udp-client/
 	public static void comms(String str, Double val) throws IOException {
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("localhost");
