@@ -60,6 +60,8 @@ class VisionProcessing {
 
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static int initGui = 0;
+	static int x, y, distance;
+	
 	
 	//static NetworkTable table;
 
@@ -120,7 +122,7 @@ class VisionProcessing {
 		if (recbr != null && rectl != null && recAreaLargest >= 4000 && 
 			recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
 			
-			System.out.println(recAreaLargest);
+			//System.out.println(recAreaLargest);
 			Core.rectangle(imageGray, recbr, rectl, new Scalar(255, 255, 255));
 			math(goalCenter(rectl.x, recbr.x, rectl.y, recbr.y), imagewidth, imageheight, recwidth, recheight);
 			recAreaLargest = 0;
@@ -168,18 +170,19 @@ class VisionProcessing {
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
 			
 			distance = realGoalWidth / 12 * imageWidth / (2 * goalWidth * Math.tan(camFieldOfView));
-			try {
-				comms("Distance", distance);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			VisionProcessing.distance = (int) Math.round(distance);
 			
 			xOffsetFt = (targetCenter.x - imageWidth / 2) / (goalWidth / realGoalWidth);
 			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / realGoalHeight);
 			
 			xOffset(distance, xOffsetFt);
 			yOffset(distance, yOffsetFt);
+			try {
+				comms(VisionProcessing.x, VisionProcessing.y, VisionProcessing.distance);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -188,13 +191,9 @@ class VisionProcessing {
 		
 		// negative angles to account for positive offsets
 		double x = -Math.toDegrees(Math.atan(xOffsetFt / distance));
-		System.out.print("X " + x);
-		try {
-			comms("X", x);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//System.out.print("X " + x);
+		VisionProcessing.x = (int) Math.round(x);
+		
 	}
 
 	public static void yOffset(double distance, double yOffsetFt) {
@@ -202,25 +201,23 @@ class VisionProcessing {
 		
 		// negative angles to account for positive offsets
 		double y = -Math.toDegrees(Math.atan(yOffsetFt / distance));
-		System.out.println("Y " + y);
-		try {
-			comms("Y", y);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		//System.out.println(" Y " + y);
+		VisionProcessing.y = (int) Math.round(y);
+		
 	}
 	//https://systembash.com/a-simple-java-udp-server-and-udp-client/
-	public static void comms(String str, Double val) throws IOException {
+	public static void comms(int x,int y,int distance) throws IOException {
+		String str = new String();
 		DatagramSocket clientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName("localhost");
+		InetAddress IPAddress = InetAddress.getByName("192.168.2.8");
 		byte[] sendData = new byte[1024];
 		
-		String sentence = str.concat(String.valueOf(val));
+		String sentence = str.concat(String.valueOf(x) + "," 
+				+ String.valueOf(y) + "," + String.valueOf(distance) + ",Last");
 		sendData = sentence.getBytes();
+		//System.out.println(sendData);
 		
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 12346);
 		clientSocket.send(sendPacket);
 		clientSocket.close();
 	}
@@ -276,7 +273,6 @@ public class Main implements ActionListener {
 
 		int i = 0;
 		
-        
 		if (webCam.isOpened()) {
 			//Half a second works just fine for init on more powerful 
 			//computers 700ms necessary for kangaroo computer
@@ -286,11 +282,11 @@ public class Main implements ActionListener {
 				Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
 				Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
 				Mat imageHSV_threshed = new Mat();
-				Mat imageRGB_threshed = new Mat();
+				Mat imageRGB_threshed = new Mat();			
 
 				webCam.read(webcam_image);
 				if (!webcam_image.empty()) {
-					Thread.sleep(5);
+					//Thread.sleep(5);
 
 					processed_image = VisionProcessing.findHighGoal(webcam_image);
 
