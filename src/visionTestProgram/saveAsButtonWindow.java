@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+//Public class which defines the functionality of the save as button in the user GUI
 public class saveAsButtonWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 
@@ -16,6 +17,7 @@ public class saveAsButtonWindow extends JFrame {
 
 	JFileChooser fc = new JFileChooser();
 
+	//Constructor to set up a JFileChooser as part of the GUI
 	public saveAsButtonWindow() {
 		String defaultPath = new String();
 
@@ -50,6 +52,7 @@ public class saveAsButtonWindow extends JFrame {
 		}
 	}
 
+	//Getter method for selected file path
 	public static String getPath() {
 		String extension = filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
 		String filePlusExt = filePath + ".txt";
@@ -63,10 +66,12 @@ public class saveAsButtonWindow extends JFrame {
 
 	}
 
+	//Method which server as a Getter for the short filename (Currently unused)
 	public static String getShortName() {
 		return shortFileName;
 	}
 
+	//Writes the currently set filter values within the GUI to the CSV specified
 	public static void writeToCSV() throws IOException {
 		readAndWriteCSV.setFileLocation(getPath());
 		readAndWriteCSV.writeStringToFile(defaultLineOne);

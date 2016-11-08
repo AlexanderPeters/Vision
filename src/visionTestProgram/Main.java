@@ -23,17 +23,20 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+
 import java.net.*;
 
-
+//Class Facepanel extends the functionality of JPanel by allowing you to display Mat objects
 class FacePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private BufferedImage image;
-
+    
+	//Constructor to initialize the JPanel class to allow it to be extended
 	public FacePanel() {
 		super();
 	}
-
+	
+	//Convert an OpenCV mat object to a Buffered Image for display
 	public boolean matToBufferedImage(Mat matrix) {
 		MatOfByte mb = new MatOfByte();
 		Highgui.imencode(".jpg", matrix, mb);
@@ -46,6 +49,7 @@ class FacePanel extends JPanel {
 		return true;
 	}
 
+	//Draw the Buffered Image to the JPanel
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (this.image == null) {
@@ -56,15 +60,14 @@ class FacePanel extends JPanel {
 
 }
 
+//Vision happens here
 class VisionProcessing {
 
 	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static int initGui = 0;
 	static int x, y, distance;
 	
-	
-	//static NetworkTable table;
-
+	//Open and read video stream then load image and find the goal
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
 
 		Mat hierarchy = new Mat();
@@ -119,8 +122,8 @@ class VisionProcessing {
 
 		}
 
-		if (recbr != null && rectl != null && recAreaLargest >= 4000 && 
-			recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
+		if (recbr != null && rectl != null && recAreaLargest >= 4000 ){//&& 
+			//recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
 			
 			//System.out.println(recAreaLargest);
 			Core.rectangle(imageGray, recbr, rectl, new Scalar(255, 255, 255));
@@ -141,6 +144,7 @@ class VisionProcessing {
 
 	}
 
+	//Return the point that is at the center of two points
 	public static Point goalCenter(double x1, double x2, double y1, double y2) {
 		Point centerPoint = new Point();
 		if (x1 != -1 && x2 != -1 && y1 != -1 && y1 != -1) {
@@ -157,23 +161,27 @@ class VisionProcessing {
 
 	}
 
+	//Determine angular offsets and distances to the goal from the camera and implements comms
 	public static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
-		double realGoalWidth = 20;// goal width in inches not pixels
-		double realGoalHeight = 14;// goal height in inches not pixels
+		final double REALGOALWIDTH = 20;// goal width in inches not pixels
+		final double REALGOALHEIGHT = 14;// goal height in inches not pixels
 		double distance;// distance to goal in ft
-		double camFieldOfView = 60;// FOV of a microsoft lifecam 3000 in degrees
+		final double CAMFIELDOFVIEW = 60;// FOV of a microsoft lifecam 3000 in degrees
 		double xOffsetFt;// width offset in width
 		double yOffsetFt;// height offset in ft
+		//final double CAMOFFSET = -11.75; //Offset from center of robot in inches.
+		//double pixelCamOffset;
 		
 		//table = NetworkTable.getTable("datatable");
 		
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
+			//pixelCamOffset = CAMOFFSET*(goalWidth / REALGOALWIDTH);
 			
-			distance = realGoalWidth / 12 * imageWidth / (2 * goalWidth * Math.tan(camFieldOfView));
+			distance = REALGOALWIDTH / 12 * imageWidth / (2 * goalWidth * Math.tan(CAMFIELDOFVIEW));
 			VisionProcessing.distance = (int) Math.round(distance);
 			
-			xOffsetFt = (targetCenter.x - imageWidth / 2) / (goalWidth / realGoalWidth);
-			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / realGoalHeight);
+			xOffsetFt = ((targetCenter.x - imageWidth / 2)) / (goalWidth / REALGOALWIDTH);
+			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / REALGOALHEIGHT);
 			
 			xOffset(distance, xOffsetFt);
 			yOffset(distance, yOffsetFt);
@@ -186,30 +194,36 @@ class VisionProcessing {
 		}
 	}
 	
+	//Calculate x angular offset
 	public static void xOffset(double distance, double xOffsetFt) {
 		// System.out.print("x " + xOffsetFt + " ");
 		
 		// negative angles to account for positive offsets
-		double x = -Math.toDegrees(Math.atan(xOffsetFt / distance));
+		double x = Math.toDegrees(Math.atan(xOffsetFt / distance));
 		//System.out.print("X " + x);
-		VisionProcessing.x = (int) Math.round(x);
+		VisionProcessing.x = (int) Math.round(x) - 22;
+		System.out.println(Math.round(x) - 22);
 		
 	}
 
+	//Calculate y angular offset
 	public static void yOffset(double distance, double yOffsetFt) {
 		// System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
 		
 		// negative angles to account for positive offsets
-		double y = -Math.toDegrees(Math.atan(yOffsetFt / distance));
+		double y = Math.toDegrees(Math.atan(yOffsetFt / distance));
 		//System.out.println(" Y " + y);
 		VisionProcessing.y = (int) Math.round(y);
 		
 	}
+	
+	
 	//https://systembash.com/a-simple-java-udp-server-and-udp-client/
+	//Create a udp datastream and send the data to the Rio
 	public static void comms(int x,int y,int distance) throws IOException {
 		String str = new String();
 		DatagramSocket clientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName("192.168.2.8");
+		InetAddress IPAddress = InetAddress.getByName("10.31.40.24");
 		byte[] sendData = new byte[1024];
 		
 		String sentence = str.concat(String.valueOf(x) + "," 
@@ -217,21 +231,24 @@ class VisionProcessing {
 		sendData = sentence.getBytes();
 		//System.out.println(sendData);
 		
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 12346);
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 12347);
 		clientSocket.send(sendPacket);
 		clientSocket.close();
 	}
 }
 
+//Main class for vision program
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
 	static boolean mycontinue = false;
 	
+	//Main class constructor to set everything up
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
 		Main main = new Main();
 	}
 
+	//Main method that loads the OpenCV libraries and runs the program
 	public Main() throws InterruptedException, IOException {
 		//System.load(Core.NATIVE_LIBRARY_NAME);
 		//System.load("opencv_java2413");
@@ -315,6 +332,7 @@ public class Main implements ActionListener {
 					if(!displayable.empty()){
 						facePanel.matToBufferedImage(displayable);
 						facePanel.repaint();
+						Thread.sleep(10);
 					}
 					
 				} else {
@@ -331,6 +349,7 @@ public class Main implements ActionListener {
 	}
 
 	@Override
+	//Run guimain when the options button is pressed
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == optionsButton) {

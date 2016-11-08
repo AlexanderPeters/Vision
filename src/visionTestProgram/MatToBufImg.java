@@ -31,7 +31,8 @@ public class MatToBufImg {
 		fileExten = fileExtension;
 		mob = new MatOfByte();
 	}
-
+	
+	//Image getter method
 	public BufferedImage getImage() {
 		// convert the matrix into a matrix of bytes appropriate for
 		// this file extension

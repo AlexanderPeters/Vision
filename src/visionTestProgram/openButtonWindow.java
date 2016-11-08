@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+//Public class which defines the functionality of the open button in the user GUI
 public class openButtonWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 
@@ -15,6 +16,7 @@ public class openButtonWindow extends JFrame {
 
 	JFileChooser fc = new JFileChooser();
 
+	//Constructor to set up a JFileChooser as part of the GUI
 	public openButtonWindow() {
 		String defaultPath = new String();
 
@@ -49,6 +51,7 @@ public class openButtonWindow extends JFrame {
 		}
 	}
 
+	//Getter method for selected file path
 	public static String getPath() {
 		String extension = filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
 		String filePlusExt = filePath + ".txt";
@@ -60,11 +63,13 @@ public class openButtonWindow extends JFrame {
 			return filePath;
 		}
 	}
-
+	
+	//Method which server as a Getter for the short filename (Currently unused)
 	public static String getShortName() {
 		return shortFileName;
 	}
 
+	//Read in values from the CSV file and sets those values in the GUI and vision filters
 	private void readInValues() {
 		// Improve by using Iterator and list
 		readAndWriteCSV.setFileLocation(getPath());

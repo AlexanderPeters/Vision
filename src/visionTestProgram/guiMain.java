@@ -21,6 +21,7 @@ import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.*;
 
+//This class defines all functionality of all menus available after the press of the options button in the main program
 public class guiMain extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private static final long serialVersionUID = 1L;
 
@@ -77,6 +78,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 	}
 
+	//Constructors to set up the options window
 	public guiMain() {
 
 		buttonNew.addActionListener(this);
@@ -191,7 +193,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		}
 
 	}
-
+	
+	//Method to allow the options window to be centered on the screen
 	private static void centerFrame(JFrame fr) {
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		int w = fr.getSize().width;
@@ -201,10 +204,11 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		fr.setLocation(x, y);
 	}
 
+	//Method which defines the functionality of all buttons and text boxes
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonNew) {
 			dispose();
-			newButtonWindow.main(null);
+			newButtonWindow.main();
 
 		} else if (e.getSource() == buttonOpen) {
 			new openButtonWindow();
@@ -218,7 +222,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 			dispose();
 		} else if (e.getSource() == buttonDefaultDir) {
 			dispose();
-			defaultDirButtonWindow.main(null);
+			defaultDirButtonWindow.main();
 		} else {
 
 			sldHueMin.setValue(parseInt(txtHueMin.getText()));
@@ -243,6 +247,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 	}
 
+	//Method which defines the functionality of all sliders
 	public void stateChanged(ChangeEvent e) {
 		txtHueMin.setText(String.valueOf(sldHueMin.getValue()));
 		txtHueMax.setText(String.valueOf(sldHueMax.getValue()));
@@ -259,11 +264,16 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 	}
 
+	//Methods parses a given string into an integer
 	public static int parseInt(String s) {
 		return Integer.parseInt(s);
 
 	}
 
+	//***********************************************//
+	//Getter and setter methods for each filter value//
+	//***********************************************//
+	
 	public static int getHueMinValue() {
 		return parseInt(HueMinVal);
 	}
@@ -313,6 +323,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		sldValueMax.setValue(x);
 	}
 
+	//Method which allows for the creation of multiple 
+	//sliders with similar functionality with reduced syntax
 	public void addSlider(JSlider s) {
 
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
@@ -327,6 +339,8 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 
 	}
 
+	//Method which allows for the creation of multiple 
+	//text boxes with similar functionality with reduced syntax
 	public void addtxtBox(JTextField s) {
 		s.setText("0");
 		s.addActionListener(this);

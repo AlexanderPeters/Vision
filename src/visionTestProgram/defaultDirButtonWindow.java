@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+//Public class that defines the functionality of the Default Dir button under the options menu
 public class defaultDirButtonWindow extends JFrame implements ActionListener, WindowListener {
 	static JTextField userInput = new JTextField(25);
 	JButton saveButton = new JButton("Save");
@@ -24,13 +25,15 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 
 	private static final long serialVersionUID = 1L;
 
-	public static void main(String[] args) {
+	//Main method to set everything up
+	public static void main() {
 		defaultDirButtonWindow fr = new defaultDirButtonWindow();
 		centerFrame(fr);
 		fr.setVisible(true);
 
 	}
 
+	//Class constructor to defines the default Dir window
 	public defaultDirButtonWindow() {
 		setTitle("Set Dir Path (Do Not Include Extensions or Directory)");
 		setSize(500, 120);
@@ -46,6 +49,7 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 
 	}
 
+	//Method to center the default Dir button window on the screen
 	private static void centerFrame(JFrame fr) {
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		int w = fr.getSize().width;
@@ -55,6 +59,7 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 		fr.setLocation(x, y);
 	}
 
+	//Format the user input so that all inputs will be uniform as far as extension (corrects incorrect extensions to .txt)
 	public static String formatPath() {
 		String extension = userInput.getText().substring(userInput.getText().lastIndexOf(".") + 1,
 				userInput.getText().length());
@@ -68,6 +73,7 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 	}
 
 	@Override
+	//If the save button is clicked this will happen
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveButton && !userInput.getText().isEmpty()) {
 			String userInputTxt = new String();
@@ -94,6 +100,7 @@ public class defaultDirButtonWindow extends JFrame implements ActionListener, Wi
 	}
 
 	@Override
+	//When the window is closed reopen the main gui
 	public void windowClosed(WindowEvent arg0) {
 		guiMain.main(null);
 
