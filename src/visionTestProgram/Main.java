@@ -16,6 +16,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -122,6 +123,7 @@ class VisionProcessing {
 
 		}
 
+
 		if (recbr != null && rectl != null && recAreaLargest >= 4000 ){//&& 
 			//recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
 			
@@ -166,9 +168,11 @@ class VisionProcessing {
 		final double REALGOALWIDTH = 20;// goal width in inches not pixels
 		final double REALGOALHEIGHT = 14;// goal height in inches not pixels
 		double distance;// distance to goal in ft
-		final double CAMFIELDOFVIEW = 60;// FOV of a microsoft lifecam 3000 in degrees
+		final double CAMFIELDOFVIEWHORIZANTLE = 60;//Horizantle FOV of a microsoft lifecam 3000 in degrees
+		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a microsoft lifecam 3000 int degrees
 		double xOffsetFt;// width offset in width
 		double yOffsetFt;// height offset in ft
+		double xScalar, yScalar;
 		//final double CAMOFFSET = -11.75; //Offset from center of robot in inches.
 		//double pixelCamOffset;
 		
@@ -177,11 +181,14 @@ class VisionProcessing {
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
 			//pixelCamOffset = CAMOFFSET*(goalWidth / REALGOALWIDTH);
 			
-			distance = REALGOALWIDTH / 12 * imageWidth / (2 * goalWidth * Math.tan(CAMFIELDOFVIEW));
+			distance = (REALGOALWIDTH / 12 * imageWidth) / (2 * goalWidth * Math.tan(CAMFIELDOFVIEWHORIZANTLE));
+			xScalar = (2*distance*Math.tan(CAMFIELDOFVIEWHORIZANTLE))/imageWidth;
+			yScalar = (2*distance*Math.tan(CAMFIELDOFVIEWVERTICAL))/imageHeight;
+			System.out.println(distance);
 			VisionProcessing.distance = (int) Math.round(distance);
 			
-			xOffsetFt = ((targetCenter.x - imageWidth / 2)) / (goalWidth / REALGOALWIDTH);
-			yOffsetFt = (imageHeight / 2 - targetCenter.y) / (goalHeight / REALGOALHEIGHT);
+			xOffsetFt = (targetCenter.x - imageWidth / 2) * xScalar;
+			yOffsetFt = (targetCenter.y - imageHeight / 2) * yScalar;
 			
 			xOffset(distance, xOffsetFt);
 			yOffset(distance, yOffsetFt);
@@ -201,8 +208,8 @@ class VisionProcessing {
 		// negative angles to account for positive offsets
 		double x = Math.toDegrees(Math.atan(xOffsetFt / distance));
 		//System.out.print("X " + x);
-		VisionProcessing.x = (int) Math.round(x) - 22;
-		System.out.println(Math.round(x) - 22);
+		VisionProcessing.x = (int) Math.round(x);
+		//System.out.println(Math.round(x));
 		
 	}
 
@@ -214,6 +221,7 @@ class VisionProcessing {
 		double y = Math.toDegrees(Math.atan(yOffsetFt / distance));
 		//System.out.println(" Y " + y);
 		VisionProcessing.y = (int) Math.round(y);
+		//System.out.println((int) Math.round(y));
 		
 	}
 	
