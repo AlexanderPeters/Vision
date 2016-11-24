@@ -167,7 +167,7 @@ class VisionProcessing {
 	public static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
 		final double REALGOALWIDTH = 20;// goal width in inches not pixels
 		final double REALGOALHEIGHT = 14;// goal height in inches not pixels
-		double distance;// distance to goal in ft
+		double d1, d2, distance;// distance to goal in ft
 		final double CAMFIELDOFVIEWHORIZANTLE = 60;//Horizantle FOV of a microsoft lifecam 3000 in degrees
 		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a microsoft lifecam 3000 int degrees
 		double xOffsetFt;// width offset in width
@@ -181,7 +181,11 @@ class VisionProcessing {
 		if (targetCenter.x != -1 && targetCenter.y != -1 && goalWidth != -1 && goalHeight != -1) {
 			//pixelCamOffset = CAMOFFSET*(goalWidth / REALGOALWIDTH);
 			
-			distance = (REALGOALWIDTH / 12 * imageWidth) / (2 * goalWidth * Math.tan(CAMFIELDOFVIEWHORIZANTLE));
+			d1 = (REALGOALWIDTH / 12 * imageWidth) / (2 * goalWidth * Math.tan(CAMFIELDOFVIEWHORIZANTLE));
+			System.out.println("d1 " + d1);
+			d2 = (REALGOALHEIGHT / 12 * imageHeight) / (2 * goalHeight * Math.sin(CAMFIELDOFVIEWVERTICAL));
+			System.out.println("d2 " + d2);
+			distance = (d1 + d2) / 2;
 			xScalar = (2*distance*Math.tan(CAMFIELDOFVIEWHORIZANTLE))/imageWidth;
 			yScalar = (2*distance*Math.tan(CAMFIELDOFVIEWVERTICAL))/imageHeight;
 			System.out.println(distance);
@@ -209,7 +213,7 @@ class VisionProcessing {
 		double x = Math.toDegrees(Math.atan(xOffsetFt / distance));
 		//System.out.print("X " + x);
 		VisionProcessing.x = (int) Math.round(x);
-		//System.out.println(Math.round(x));
+		System.out.println("X " + Math.round(x));
 		
 	}
 
@@ -221,7 +225,7 @@ class VisionProcessing {
 		double y = Math.toDegrees(Math.atan(yOffsetFt / distance));
 		//System.out.println(" Y " + y);
 		VisionProcessing.y = (int) Math.round(y);
-		//System.out.println((int) Math.round(y));
+		System.out.println("Y " + ((int) Math.round(y) + 20));
 		
 	}
 	
