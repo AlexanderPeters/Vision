@@ -64,9 +64,9 @@ class FacePanel extends JPanel {
 //Vision happens here
 class VisionProcessing {
 
-	public static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-	public static int initGui = 0;
-	static int x, y, distance;
+	private static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	private static int initGui = 0;
+	private static int x, y, distanceToCam, distance;
 	
 	//Open and read video stream then load image and find the goal
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
@@ -120,7 +120,7 @@ class VisionProcessing {
 
 			}
 			iterator.remove();
-
+ 
 		}
 
 
@@ -147,7 +147,7 @@ class VisionProcessing {
 	}
 
 	//Return the point that is at the center of two points
-	public static Point goalCenter(double x1, double x2, double y1, double y2) {
+	private static Point goalCenter(double x1, double x2, double y1, double y2) {
 		Point centerPoint = new Point();
 		if (x1 != -1 && x2 != -1 && y1 != -1 && y1 != -1) {
 
@@ -164,13 +164,15 @@ class VisionProcessing {
 	}
 
 	//Determine angular offsets and distances to the goal from the camera and implements comms
-	public static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
+	private static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
 		final double REALGOALWIDTH = 20;// goal width in inches not pixels
 		final double REALGOALHEIGHT = 14;// goal height in inches not pixels
-		double d1, d2, distance;// distance to goal in ft
+		double d1, d2, distanceToCam, distance;// distance to goal in ft
 		final double CAMFIELDOFVIEWHORIZANTLE = 60;//Horizantle FOV of a microsoft lifecam 3000 in degrees
 		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a microsoft lifecam 3000 int degrees
+		final double GOALHEIGHT = 8.0833; //Hiehgt to center of goal from floor in ft
 		double xOffsetFt;// width offset in width
+		double xPixOffsetFromCenter = 0;//ft to left or right of robot times scalar (- value if offset left of center line + if offset to the right)
 		double yOffsetFt;// height offset in ft
 		double xScalar, yScalar;
 		//final double CAMOFFSET = -11.75; //Offset from center of robot in inches.
@@ -185,19 +187,23 @@ class VisionProcessing {
 			System.out.println("d1 " + d1);
 			d2 = (REALGOALHEIGHT / 12 * imageHeight) / (2 * goalHeight * Math.sin(CAMFIELDOFVIEWVERTICAL));
 			System.out.println("d2 " + d2);
-			distance = (d1 + d2) / 2;
-			xScalar = (2*distance*Math.tan(CAMFIELDOFVIEWHORIZANTLE))/imageWidth;
-			yScalar = (2*distance*Math.tan(CAMFIELDOFVIEWVERTICAL))/imageHeight;
-			System.out.println(distance);
-			VisionProcessing.distance = (int) Math.round(distance);
 			
-			xOffsetFt = (targetCenter.x - imageWidth / 2) * xScalar;
+			distanceToCam = (d1 + d2) / 2;
+			distance = Math.asin(GOALHEIGHT/distanceToCam);
+			
+			xScalar = (2*distanceToCam*Math.tan(CAMFIELDOFVIEWHORIZANTLE))/imageWidth;
+			yScalar = (2*distanceToCam*Math.tan(CAMFIELDOFVIEWVERTICAL))/imageHeight;
+			
+			System.out.println(distanceToCam);
+			VisionProcessing.distanceToCam = (int) Math.round(distanceToCam);
+			
+			xOffsetFt = (targetCenter.x - (imageWidth / 2 - xPixOffsetFromCenter)) * xScalar;
 			yOffsetFt = (targetCenter.y - imageHeight / 2) * yScalar;
 			
-			xOffset(distance, xOffsetFt);
-			yOffset(distance, yOffsetFt);
+			xOffset(distanceToCam, xOffsetFt);
+			yOffset(distanceToCam, yOffsetFt);
 			try {
-				comms(VisionProcessing.x, VisionProcessing.y, VisionProcessing.distance);
+				comms(VisionProcessing.x, VisionProcessing.y, VisionProcessing.distanceToCam);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -206,33 +212,39 @@ class VisionProcessing {
 	}
 	
 	//Calculate x angular offset
-	public static void xOffset(double distance, double xOffsetFt) {
+	private static void xOffset(double distanceToCam, double xOffsetFt) {
 		// System.out.print("x " + xOffsetFt + " ");
 		
 		// negative angles to account for positive offsets
-		double x = Math.toDegrees(Math.atan(xOffsetFt / distance));
+		double x = Math.toDegrees(Math.atan(xOffsetFt / distanceToCam));
 		//System.out.print("X " + x);
 		VisionProcessing.x = (int) Math.round(x);
 		System.out.println("X " + Math.round(x));
 		
 	}
 
-	//Calculate y angular offset
-	public static void yOffset(double distance, double yOffsetFt) {
+	//Calculate y angular offset                                
+	private static void yOffset(double distanceToCam, double yOffsetFt) {
 		// System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
+		int yOffset = 28;//angle offset of cam to  line of fire ( + if cam above center line of fire) (- if below center line)
 		
 		// negative angles to account for positive offsets
-		double y = Math.toDegrees(Math.atan(yOffsetFt / distance));
+		double y = Math.toDegrees(Math.atan(yOffsetFt / distanceToCam));
 		//System.out.println(" Y " + y);
-		VisionProcessing.y = (int) Math.round(y);
-		System.out.println("Y " + ((int) Math.round(y) + 20));
+		VisionProcessing.y = (int) Math.round(y) + yOffset;
+		System.out.println("Y " + accountForG(VisionProcessing.y));
 		
+	}
+	private static double accountForG(int visionAngle){
+		final double SHOOTERSPEED = 29.78;//Magnitude of velocity in ft/s
+		double accountForGravityAngle = Math.atan((SHOOTERSPEED * Math.sin(visionAngle) - 16) / VisionProcessing.distance);
+		return visionAngle + accountForGravityAngle;
 	}
 	
 	
 	//https://systembash.com/a-simple-java-udp-server-and-udp-client/
 	//Create a udp datastream and send the data to the Rio
-	public static void comms(int x,int y,int distance) throws IOException {
+	private static void comms(int x,int y,int distance) throws IOException {
 		String str = new String();
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("10.31.40.24");
