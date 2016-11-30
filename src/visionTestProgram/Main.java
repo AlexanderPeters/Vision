@@ -3,9 +3,12 @@ package visionTestProgram;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,8 +27,10 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.video.Video;
 
 import java.net.*;
+import java.text.DecimalFormat;
 
 //Class Facepanel extends the functionality of JPanel by allowing you to display Mat objects
 class FacePanel extends JPanel {
@@ -66,7 +71,8 @@ class VisionProcessing {
 
 	private static ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	private static int initGui = 0;
-	private static int x, y, distanceToCam, distance;
+	private static int x, y, distanceToCam;
+	static double distance;
 	
 	//Open and read video stream then load image and find the goal
 	public static Mat findHighGoal(Mat m) throws InterruptedException {
@@ -103,6 +109,9 @@ class VisionProcessing {
 
 		Imgproc.cvtColor(imageHSV_threshed, imageRGB_threshed, Imgproc.COLOR_HSV2RGB);
 		Imgproc.cvtColor(imageRGB_threshed, imageGray, Imgproc.COLOR_RGB2GRAY);
+		
+		Mat mask = new Mat(imageGray.size(), CvType.CV_8U);//Denoise
+	    Imgproc.threshold(imageGray, mask, 70, 255, Imgproc.THRESH_BINARY_INV);//Denoise
 
 		Imgproc.findContours(imageGray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
@@ -124,8 +133,8 @@ class VisionProcessing {
 		}
 
 
-		if (recbr != null && rectl != null && recAreaLargest >= 4000 ){//&& 
-			//recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
+		if (recbr != null && rectl != null && recAreaLargest >= 4000 && 
+			recheight < recwidth * 0.75 && recwidth <= 1.75 * recheight){
 			
 			//System.out.println(recAreaLargest);
 			Core.rectangle(imageGray, recbr, rectl, new Scalar(255, 255, 255));
@@ -172,9 +181,10 @@ class VisionProcessing {
 		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a microsoft lifecam 3000 int degrees
 		final double GOALHEIGHT = 8.0833; //Hiehgt to center of goal from floor in ft
 		double xOffsetFt;// width offset in width
-		double xPixOffsetFromCenter = 0;//ft to left or right of robot times scalar (- value if offset left of center line + if offset to the right)
+		double xPixOffsetFromCenter;//ft to left or right of robot times scalar (- value if offset left of center line + if offset to the right)
 		double yOffsetFt;// height offset in ft
 		double xScalar, yScalar;
+		final double camAngle = 20;
 		//final double CAMOFFSET = -11.75; //Offset from center of robot in inches.
 		//double pixelCamOffset;
 		
@@ -184,24 +194,28 @@ class VisionProcessing {
 			//pixelCamOffset = CAMOFFSET*(goalWidth / REALGOALWIDTH);
 			
 			d1 = (REALGOALWIDTH / 12 * imageWidth) / (2 * goalWidth * Math.tan(CAMFIELDOFVIEWHORIZANTLE));
-			System.out.println("d1 " + d1);
+			//System.out.println("d1 " + d1);
 			d2 = (REALGOALHEIGHT / 12 * imageHeight) / (2 * goalHeight * Math.sin(CAMFIELDOFVIEWVERTICAL));
-			System.out.println("d2 " + d2);
+			//System.out.println("d2 " + d2);
 			
 			distanceToCam = (d1 + d2) / 2;
-			distance = Math.asin(GOALHEIGHT/distanceToCam);
+			VisionProcessing.distance = distanceToCam * Math.cos(Math.toRadians(camAngle));
 			
 			xScalar = (2*distanceToCam*Math.tan(CAMFIELDOFVIEWHORIZANTLE))/imageWidth;
 			yScalar = (2*distanceToCam*Math.tan(CAMFIELDOFVIEWVERTICAL))/imageHeight;
+//			System.out.println("disttocam " + distanceToCam);
 			
-			System.out.println(distanceToCam);
+//			System.out.println("dist " + VisionProcessing.distance);
 			VisionProcessing.distanceToCam = (int) Math.round(distanceToCam);
-			
+			xPixOffsetFromCenter = 1.0833 * 0.5 * 1/xScalar;
+			//System.out.println(1/xScalar);
+			//System.out.println(xPixOffsetFromCenter);
 			xOffsetFt = (targetCenter.x - (imageWidth / 2 - xPixOffsetFromCenter)) * xScalar;
 			yOffsetFt = (targetCenter.y - imageHeight / 2) * yScalar;
 			
 			xOffset(distanceToCam, xOffsetFt);
-			yOffset(distanceToCam, yOffsetFt);
+			yOffset();//(distanceToCam, yOffsetFt);
+			
 			try {
 				comms(VisionProcessing.x, VisionProcessing.y, VisionProcessing.distanceToCam);
 			} catch (IOException e) {
@@ -219,27 +233,59 @@ class VisionProcessing {
 		double x = Math.toDegrees(Math.atan(xOffsetFt / distanceToCam));
 		//System.out.print("X " + x);
 		VisionProcessing.x = (int) Math.round(x);
-		System.out.println("X " + Math.round(x));
+//		System.out.println("X " + Math.round(x));
 		
 	}
 
 	//Calculate y angular offset                                
-	private static void yOffset(double distanceToCam, double yOffsetFt) {
+	private static void yOffset(){//(double distanceToCam, double yOffsetFt) {
 		// System.out.println("y " + yOffsetFt);// + " " + "dist " + distance);
-		int yOffset = 28;//angle offset of cam to  line of fire ( + if cam above center line of fire) (- if below center line)
+		//int yOffset = 20;//angle offset of cam to  line of fire ( + if cam above center line of fire) (- if below center line)
 		
 		// negative angles to account for positive offsets
-		double y = Math.toDegrees(Math.atan(yOffsetFt / distanceToCam));
+		//double y = Math.toDegrees((Math.atan(yOffsetFt / distanceToCam)));
 		//System.out.println(" Y " + y);
-		VisionProcessing.y = (int) Math.round(y) + yOffset;
-		System.out.println("Y " + accountForG(VisionProcessing.y));
+		//VisionProcessing.y = (int) Math.round(accountForG(y + yOffset));
+		VisionProcessing.y = trajectory();
+//		System.out.println("Y " + VisionProcessing.y);
+		
+		
+	}/*
+	private static int accountForG(){
+		final double GOALHEIGHT = 8.0833; //Hiehgt to center of goal from floor in ft 
+		double SHOOTERSPEED = 29.78;//Magnitude of velocity in ft/s
+		double yVelocity, xVelocity, time;
+		double yDisp, xDisp;
+		double yDiff, xDiff;
+		double bestOffset = 1000000, currentOffset;
+		int closestAngle = 0;
+		for (int angle = 20; angle < 51; angle ++){
+			yVelocity = SHOOTERSPEED * Math.sin(angle);
+			xVelocity = SHOOTERSPEED * Math.cos(angle);
+			time = VisionProcessing.distance / xVelocity;
+			yDisp = yVelocity*time - 16*Math.pow(time, 2);
+			xDisp = xVelocity*time;
+			yDiff = GOALHEIGHT - yDisp;
+			xDiff = VisionProcessing.distance - xDisp;
+			currentOffset = (yDiff + xDiff)/2;
+			
+			if(currentOffset < bestOffset)
+				closestAngle = angle;
+			
+			
+		}
+		
+		return closestAngle;
+	}*/
+	
+	private static int trajectory(){//represents piecewise trajectory
+		if (VisionProcessing.distanceToCam <= 13.8 && VisionProcessing.distanceToCam >= 10.6)
+			return 45;//all the way up
+		else
+			return 50;//slightly down
 		
 	}
-	private static double accountForG(int visionAngle){
-		final double SHOOTERSPEED = 29.78;//Magnitude of velocity in ft/s
-		double accountForGravityAngle = Math.atan((SHOOTERSPEED * Math.sin(visionAngle) - 16) / VisionProcessing.distance);
-		return visionAngle + accountForGravityAngle;
-	}
+	
 	
 	
 	//https://systembash.com/a-simple-java-udp-server-and-udp-client/
@@ -264,8 +310,7 @@ class VisionProcessing {
 //Main class for vision program
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
-	static boolean mycontinue = false;
-	
+			
 	//Main class constructor to set everything up
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
@@ -274,6 +319,7 @@ public class Main implements ActionListener {
 
 	//Main method that loads the OpenCV libraries and runs the program
 	public Main() throws InterruptedException, IOException {
+		
 		//System.load(Core.NATIVE_LIBRARY_NAME);
 		//System.load("opencv_java2413");
 		System.out.println(OSValidator.getOS());
@@ -305,20 +351,34 @@ public class Main implements ActionListener {
 		frame.add(facePanel, BorderLayout.CENTER);
 		frame.add(mainPanel, BorderLayout.EAST);
 		frame.setVisible(true);
-
+		
 		Mat webcam_image = new Mat();
 		Mat imageGray = new Mat();
 		Mat processed_image = new Mat();
 
 		VideoCapture webCam = new VideoCapture(0);
-
-		int i = 0;
+		//double fps = webCam.get(Core.);
+		
+		/*int CV_CAP_PROP_EXPOSURE = 0;
+		webCam.set(CV_CAP_PROP_EXPOSURE, -100);
+		int CV_CAP_PROP_BRIGHTNESS = 0;
+		webCam.set(CV_CAP_PROP_BRIGHTNESS, -100);
+	    */
+		//int CV_CAP_PROP_FPS = 5;
+		DecimalFormat format = new DecimalFormat("0.##");	
+		double sysProcessStartTime, sysProcessEndTime;
+		double time = 0.0, timeAvg = 0.0, fps = 0.0;
+		int frameCount = 0;
 		
 		if (webCam.isOpened()) {
 			//Half a second works just fine for init on more powerful 
 			//computers 700ms necessary for kangaroo computer
 			Thread.sleep(700);
 			while (true) {
+				frameCount++;
+				sysProcessStartTime = System.currentTimeMillis();
+				
+				//System.out.println("FPS " + webCam.get(CV_CAP_PROP_FPS));
 				Mat displayable = new Mat();
 				Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
 				Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
@@ -344,21 +404,26 @@ public class Main implements ActionListener {
 					Imgproc.cvtColor(imageHSV_threshed, imageRGB_threshed, Imgproc.COLOR_HSV2RGB);
 					Imgproc.cvtColor(imageRGB_threshed, imageGray, Imgproc.COLOR_RGB2GRAY);
 					Imgproc.cvtColor(imageGray, webcam_image, Imgproc.COLOR_GRAY2RGB);
-
+										
+					Core.putText(processed_image, "FPS: " + format.format(fps), new Point (processed_image.rows()/16,processed_image.cols()/14), Core.FONT_HERSHEY_DUPLEX, new Double (1), new Scalar(255));
+				
 					List<Mat> src = Arrays.asList(webcam_image, processed_image);
 					Core.hconcat(src, displayable);
-
-					if (i == 0) {// so we don't have to resize the frame every
-								 // time through (performance gain).
-						frame.setSize(displayable.width() + 80, displayable.height() + 120);
-						i++;
-					}
+										
+					if (frameCount == 1) // so we don't have to resize the frame every
+						frame.setSize(displayable.width() + 80, displayable.height() + 120);// time through (performance gain).						
+					
 					if(!displayable.empty()){
 						facePanel.matToBufferedImage(displayable);
 						facePanel.repaint();
-						Thread.sleep(10);
+						//Thread.sleep(10);
 					}
-					
+					sysProcessEndTime = System.currentTimeMillis();
+					time += sysProcessEndTime - sysProcessStartTime;
+					//System.out.println("Time " + time);
+					timeAvg = time/frameCount;
+					//System.out.println("avg " + timeAvg);
+					fps = 1000 / timeAvg;
 				} else {
 
 					System.out.println(" --(!) No captured frame from webcam !");
@@ -371,7 +436,8 @@ public class Main implements ActionListener {
 		Thread.sleep(50);
 		main(null);
 	}
-
+	
+	
 	@Override
 	//Run guimain when the options button is pressed
 	public void actionPerformed(ActionEvent e) {
