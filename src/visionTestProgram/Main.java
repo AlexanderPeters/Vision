@@ -429,7 +429,7 @@ public class Main implements ActionListener {
 						timeAvg = time / (frameCount %5);
 					
 					fps = 1000 / timeAvg;
-					//Note that fps counter is a little stringy but, I did it this way because, I might need a frame
+					//Note that FPS counter is a little stringy but, I did it this way because, I might need a frame
 					//counter later so this is probably better in the long run instead of just using a 1-5 counter
 				} else {
 
