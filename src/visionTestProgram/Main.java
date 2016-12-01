@@ -420,10 +420,17 @@ public class Main implements ActionListener {
 					}
 					sysProcessEndTime = System.currentTimeMillis();
 					time += sysProcessEndTime - sysProcessStartTime;
-					//System.out.println("Time " + time);
-					timeAvg = time/frameCount;
-					//System.out.println("avg " + timeAvg);
+					
+					if(frameCount %5 == 0) {
+						timeAvg = time / 5;
+						time = 0; //Reset time count after averaging 5 frames
+					}
+					else
+						timeAvg = time / (frameCount %5);
+					
 					fps = 1000 / timeAvg;
+					//Note that fps counter is a little stringy but, I did it this way because, I might need a frame
+					//counter later so this is probably better in the long run instead of just using a 1-5 counter
 				} else {
 
 					System.out.println(" --(!) No captured frame from webcam !");
