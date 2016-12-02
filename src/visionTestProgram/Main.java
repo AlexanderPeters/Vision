@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ class FacePanel extends JPanel {
 	}
 
 }
+
 
 //Vision happens here
 class VisionProcessing {
@@ -310,7 +312,11 @@ class VisionProcessing {
 //Main class for vision program
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
-			
+	JButton debugOnButton = new JButton("Debug On");
+	JButton debugOffButton = new JButton("Debug Off");
+	private static boolean debugModeEnabled = false;
+	private static double sysProcessStartTime; 
+	private static int frameCount = 0;
 	//Main class constructor to set everything up
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
@@ -336,9 +342,11 @@ public class Main implements ActionListener {
 		}
 				
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
-		JPanel mainPanel = new JPanel();
+		JPanel mainPanel = new JPanel(new BorderLayout());
 
 		optionsButton.addActionListener(this);
+		debugOnButton.addActionListener(this);
+		debugOffButton.addActionListener(this);
 
 		FacePanel facePanel = new FacePanel();
 		frame.setLayout(new BorderLayout());
@@ -346,17 +354,19 @@ public class Main implements ActionListener {
 		frame.setBackground(Color.BLUE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		mainPanel.add(optionsButton);
+		mainPanel.add(optionsButton, BorderLayout.EAST);
+		mainPanel.add(debugOnButton, BorderLayout.CENTER);
+		mainPanel.add(debugOffButton, BorderLayout.WEST);
 
 		frame.add(facePanel, BorderLayout.CENTER);
-		frame.add(mainPanel, BorderLayout.EAST);
+		frame.add(mainPanel, BorderLayout.SOUTH);
 		frame.setVisible(true);
 		
 		Mat webcam_image = new Mat();
-		Mat imageGray = new Mat();
-		Mat processed_image = new Mat();
+		
 
 		VideoCapture webCam = new VideoCapture(0);
+		int i = 0;
 		//double fps = webCam.get(Core.);
 		
 		/*int CV_CAP_PROP_EXPOSURE = 0;
@@ -365,85 +375,55 @@ public class Main implements ActionListener {
 		webCam.set(CV_CAP_PROP_BRIGHTNESS, -100);
 	    */
 		//int CV_CAP_PROP_FPS = 5;
-		DecimalFormat format = new DecimalFormat("0.##");	
-		double sysProcessStartTime, sysProcessEndTime;
-		double time = 0.0, timeAvg = 0.0, fps = 0.0;
-		int frameCount = 0;
 		
-		if (webCam.isOpened()) {
-			//Half a second works just fine for init on more powerful 
-			//computers 700ms necessary for kangaroo computer
-			Thread.sleep(700);
-			while (true) {
-				frameCount++;
-				sysProcessStartTime = System.currentTimeMillis();
-				
-				//System.out.println("FPS " + webCam.get(CV_CAP_PROP_FPS));
-				Mat displayable = new Mat();
-				Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
-				Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
-				Mat imageHSV_threshed = new Mat();
-				Mat imageRGB_threshed = new Mat();			
+		
+		while (true) {
+			if (debugModeEnabled == false) {
 
-				webCam.read(webcam_image);
-				if (!webcam_image.empty()) {
-					//Thread.sleep(5);
+				// Half a second works just fine for init on more powerful
+				// computers 700ms necessary for kangaroo computer
+				Thread.sleep(700);
+				while (true) {
+					frameCount++;
+					sysProcessStartTime = System.currentTimeMillis();
+					webCam.read(webcam_image);
+					if (!webcam_image.empty() && webCam.isOpened()) {
+						// Thread.sleep(5);
+						if(i == 0)
+							Vision.setResize(true);
+						else
+							Vision.setResize(false);
+						Vision.vision(webcam_image, facePanel, frame, true);
 
-					processed_image = VisionProcessing.findHighGoal(webcam_image);
+					} else {
 
-					Scalar low = new Scalar(guiMain.getHueMinValue(), guiMain.getValueMinValue(),
-							guiMain.getSaturationMinValue());
-					Scalar high = new Scalar(guiMain.getHueMaxValue(), guiMain.getValueMaxValue(),
-							guiMain.getSaturationMaxValue());
-
-					Imgproc.cvtColor(webcam_image, frameHSV, Imgproc.COLOR_RGB2HSV);
-
-					Core.inRange(frameHSV, low, high, frame_threshed);
-					Core.bitwise_and(frameHSV, frameHSV, imageHSV_threshed, frame_threshed);
-
-					Imgproc.cvtColor(imageHSV_threshed, imageRGB_threshed, Imgproc.COLOR_HSV2RGB);
-					Imgproc.cvtColor(imageRGB_threshed, imageGray, Imgproc.COLOR_RGB2GRAY);
-					Imgproc.cvtColor(imageGray, webcam_image, Imgproc.COLOR_GRAY2RGB);
-										
-					Core.putText(processed_image, "FPS: " + format.format(fps), new Point (processed_image.rows()/16,processed_image.cols()/14), Core.FONT_HERSHEY_DUPLEX, new Double (1), new Scalar(255));
-				
-					List<Mat> src = Arrays.asList(webcam_image, processed_image);
-					Core.hconcat(src, displayable);
-										
-					if (frameCount == 1) // so we don't have to resize the frame every
-						frame.setSize(displayable.width() + 80, displayable.height() + 120);// time through (performance gain).						
-					
-					if(!displayable.empty()){
-						facePanel.matToBufferedImage(displayable);
-						facePanel.repaint();
-						//Thread.sleep(10);
+						System.out.println(" --(!) No captured frame from webcam !");
+						webCam.release();
+						frame.dispose();
+						Thread.sleep(50);
+						main(null);
 					}
-					sysProcessEndTime = System.currentTimeMillis();
-					time += sysProcessEndTime - sysProcessStartTime;
-					
-					if(frameCount %5 == 0) {
-						timeAvg = time / 5;
-						time = 0; //Reset time count after averaging 5 frames
-					}
-					else
-						timeAvg = time / (frameCount %5);
-					
-					fps = 1000 / timeAvg;
-					//Note that FPS counter is a little stringy but, I did it this way because, I might need a frame
-					//counter later so this is probably better in the long run instead of just using a 1-5 counter
-				} else {
-
-					System.out.println(" --(!) No captured frame from webcam !");
-					break;
+					if (debugModeEnabled)
+						break;
+					i++;
 				}
+
+			} else if (debugModeEnabled == true) {
+				Mat m =  Highgui.imread(debugButtonWindow.getPath(), Highgui.CV_LOAD_IMAGE_COLOR);
+				Vision.vision(m, facePanel, frame, false);
 			}
 		}
-		webCam.release();
-		frame.dispose();
-		Thread.sleep(50);
-		main(null);
 	}
 	
+	public static void setDebugMode(boolean enabled) {
+		debugModeEnabled = enabled;
+	}
+	public static double getSysProcessStartTime() {
+		return sysProcessStartTime; 
+	}
+	public static int getFrameCount() {
+		return frameCount;
+	}
 	
 	@Override
 	//Run guimain when the options button is pressed
@@ -451,6 +431,13 @@ public class Main implements ActionListener {
 
 		if (e.getSource() == optionsButton) {
 			guiMain.main(null);
+		}
+		if (e.getSource() == debugOnButton) {
+			new debugButtonWindow();
+			debugModeEnabled = true;
+		}
+		if (e.getSource() == debugOffButton) {
+			debugModeEnabled = false;
 		}
 
 	}

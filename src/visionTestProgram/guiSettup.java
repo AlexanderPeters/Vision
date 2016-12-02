@@ -21,7 +21,6 @@ public class guiSettup extends JFrame {
 			System.out.println(defaultDir);
 			readAndWriteCSV.setFileLocation(defaultDir);
 			readInValues();
-			
 		}
 
 	}
@@ -41,4 +40,5 @@ public class guiSettup extends JFrame {
 		}
 
 	}
+	
 }

@@ -182,6 +182,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 			if (tempDirChecker.exists() && tempDirChecker.length() != 0) {
 				try {
 					guiSettup.setFilePath(settingsPath);
+					
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -189,11 +190,12 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				//this.dispose();
 			}
 		}
 
 	}
-	
+		
 	//Method to allow the options window to be centered on the screen
 	private static void centerFrame(JFrame fr) {
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
