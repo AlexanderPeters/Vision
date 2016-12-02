@@ -9,7 +9,7 @@
 
 ## Installation
 https://drive.google.com/open?id=0B42XozG4U9uCVE1pUHJmY0xEUGM
--Note: that dpending upon your installation camAngle in Main.math() should be modified to represent the angle formed between the vector
+-Note: that depending upon your installation camAngle in Main.math() should be modified to represent the angle formed between the vector
 of the camera pointing towards the goal and the level floor upon which the robot is located.
 
 ## Hardware
