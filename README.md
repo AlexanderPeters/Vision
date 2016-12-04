@@ -1,14 +1,16 @@
 # Vision
 ## To Do
 - Enable OpenCV to control Camera to prevent windows from accidentally not setting the correct exposure (if possible)
-- Add ability to load single images for testing filters w/out a camera
+- Add ability to load single images for testing filters w/out a camera //////////Objective completed
 - Average multiple frames for denoising
-- Rewrite Main class to remove spaghetti code
+- Rewrite Main class to remove spaghetti code//In progress
 - Add ability for user to click on one part of the image and receive pixel values in order to quicken filter tuning
 - Move image capture and image processing to seperate threads in order to improve system performance
 
 ## Installation
 https://drive.google.com/open?id=0B42XozG4U9uCVE1pUHJmY0xEUGM
+-Note: that depending upon your installation camAngle in Main.math() should be modified to represent the angle formed between the vector
+of the camera pointing towards the goal and the level floor upon which the robot is located.
 
 ## Hardware
 - Microsoft LifeCam HD-3000
@@ -29,3 +31,9 @@ for the 2017 competition season. It was also developed for personal education an
 - Other technical help regarding FRC can be found at https://www.chiefdelphi.com/forums/portal.php
 - OpenCV API and main website http://opencv.org/
 - OpenCV Forums http://answers.opencv.org/questions/
+
+## Code capabilities
+The code currently allows for a webcam to be streamed, filtered, denoised, and then go through the process of analyzing contours to 
+determine the location of the camera relative to the retroreflective tape goal described here. https://static1.squarespace.com/static/5660f08ee4b02bc8dd3e4879/t/5696e22b1c121044d442eff0/1452728893521/
+The code has a fully fleshed out user interface to allow for easy modification of image filters while viewing before and after video streams aswell as a new debug feature which will allow users to analyze one image at a time.
+-Note: the code also has accidental camera disconnect protections so that at anytime if the camera is temporarily disconnected once reinserted video processing shoudl recommence automatically.
