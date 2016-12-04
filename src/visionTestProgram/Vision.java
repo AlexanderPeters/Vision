@@ -1,5 +1,7 @@
 package visionTestProgram;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -23,11 +25,13 @@ public class Vision {
 	private static double sysProcessStartTime;
 	private static boolean resize;
 	public static void vision(Mat m, FacePanel facePanel, JFrame frame, Boolean withFPS) throws InterruptedException {
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int width = (int) screenSize.getWidth();
+		int height = (int) screenSize.getHeight();
+
 		DecimalFormat format = new DecimalFormat("0.##");	
 		double sysProcessEndTime;
 		
-		
-		//System.out.println("FPS " + webCam.get(CV_CAP_PROP_FPS));
 		Mat displayable = new Mat();
 		Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
 		Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
@@ -63,7 +67,7 @@ public class Vision {
 		Core.hconcat(src, displayable);
 							
 		if (resize) // so we don't have to resize the frame every time through (performance gain).
-			frame.setSize(displayable.width() + 80, displayable.height() + 120);						
+			frame.setSize(width, height-100);						
 		
 		if(!displayable.empty()){
 			facePanel.matToBufferedImage(displayable);

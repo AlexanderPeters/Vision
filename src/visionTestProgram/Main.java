@@ -178,13 +178,13 @@ class VisionProcessing {
 	private static void math(Point targetCenter, int imageWidth, int imageHeight, double goalWidth, double goalHeight) {
 		final double REALGOALWIDTH = 20;// goal width in inches not pixels
 		final double REALGOALHEIGHT = 14;// goal height in inches not pixels
-		double d1, d2, distanceToCam, distance;// distance to goal in ft
-		final double CAMFIELDOFVIEWHORIZANTLE = 60;//Horizantle FOV of a microsoft lifecam 3000 in degrees
-		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a microsoft lifecam 3000 int degrees
-		final double GOALHEIGHT = 8.0833; //Hiehgt to center of goal from floor in ft
+		double d1, d2, distanceToCam, distance;// distance to goal in FT
+		final double CAMFIELDOFVIEWHORIZANTLE = 60;//Horizontal FOV of a Microsoft lifeCam 3000 in degrees
+		final double CAMFIELDOFVIEWVERTICAL = 34;//Vertical FOV of a Microsoft lifeCam 3000 in degrees
+		final double GOALHEIGHT = 8.0833; //Height to center of goal from floor in FT
 		double xOffsetFt;// width offset in width
-		double xPixOffsetFromCenter;//ft to left or right of robot times scalar (- value if offset left of center line + if offset to the right)
-		double yOffsetFt;// height offset in ft
+		double xPixOffsetFromCenter;//FT to left or right of robot times scalar (- value if offset left of center line + if offset to the right)
+		double yOffsetFt;// height offset in FT
 		double xScalar, yScalar;
 		final double camAngle = 20;
 		//final double CAMOFFSET = -11.75; //Offset from center of robot in inches.
@@ -309,38 +309,47 @@ class VisionProcessing {
 	}
 }
 
-//Main class for vision program
+// Main class for vision program
 public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
-	JButton debugOnButton = new JButton("Debug On");
+	JButton debugOnButton = new JButton("Debug On // Load New Image");
 	JButton debugOffButton = new JButton("Debug Off");
 	private static boolean debugModeEnabled = false;
-	private static double sysProcessStartTime; 
+	private static double sysProcessStartTime;
 	private static int frameCount = 0;
-	//Main class constructor to set everything up
+
+	private enum Mode {
+		Debug, VideoCapture, ProgramStart
+	}
+
+	// Main method to start program
 	public static void main(String[] args) throws InterruptedException, IOException {
 		@SuppressWarnings("unused")
 		Main main = new Main();
 	}
 
-	//Main method that loads the OpenCV libraries and runs the program
+	// Main class constructor
 	public Main() throws InterruptedException, IOException {
-		
-		//System.load(Core.NATIVE_LIBRARY_NAME);
-		//System.load("opencv_java2413");
+		program();
+	}
+
+	// Main method that loads the OpenCV libraries and runs the program
+	private void program() throws InterruptedException, IOException {
+
+		// System.load(Core.NATIVE_LIBRARY_NAME);
+		// System.load("opencv_java2413");
 		System.out.println(OSValidator.getOS());
-		if(OSValidator.isWindows()){
+		if (OSValidator.isWindows()) {
 			System.out.println("Is windows!!");
 			Runtime.getRuntime().loadLibrary("opencv_java2413");
-			//Runtime.getRuntime().loadLibrary("NetworkTables");
-		
-		}
-		else if(OSValidator.isUnix()){
+			// Runtime.getRuntime().loadLibrary("NetworkTables");
+
+		} else if (OSValidator.isUnix()) {
 			System.out.println("Is Linux!!");
 			Runtime.getRuntime().loadLibrary("libopencv_core");
-			
+
 		}
-				
+
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
 		JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -361,25 +370,31 @@ public class Main implements ActionListener {
 		frame.add(facePanel, BorderLayout.CENTER);
 		frame.add(mainPanel, BorderLayout.SOUTH);
 		frame.setVisible(true);
-		
+
 		Mat webcam_image = new Mat();
-		
 
 		VideoCapture webCam = new VideoCapture(0);
-		int i = 0;
-		//double fps = webCam.get(Core.);
-		
-		/*int CV_CAP_PROP_EXPOSURE = 0;
-		webCam.set(CV_CAP_PROP_EXPOSURE, -100);
-		int CV_CAP_PROP_BRIGHTNESS = 0;
-		webCam.set(CV_CAP_PROP_BRIGHTNESS, -100);
-	    */
-		//int CV_CAP_PROP_FPS = 5;
-		
-		
+
+		Mode lastMode = Mode.ProgramStart;
+		Mode currentMode = Mode.ProgramStart;
+
+		// double fps = webCam.get(Core.);
+
+		/*
+		 * int CV_CAP_PROP_EXPOSURE = 0; webCam.set(CV_CAP_PROP_EXPOSURE, -100);
+		 * int CV_CAP_PROP_BRIGHTNESS = 0; webCam.set(CV_CAP_PROP_BRIGHTNESS,
+		 * -100);
+		 */
+		// int CV_CAP_PROP_FPS = 5;
+
+		if (currentMode != lastMode || lastMode == Mode.ProgramStart)
+			Vision.setResize(true);
+		else
+			Vision.setResize(false);
+
 		while (true) {
 			if (debugModeEnabled == false) {
-
+				currentMode = Mode.VideoCapture;
 				// Half a second works just fine for init on more powerful
 				// computers 700ms necessary for kangaroo computer
 				Thread.sleep(700);
@@ -387,46 +402,46 @@ public class Main implements ActionListener {
 					frameCount++;
 					sysProcessStartTime = System.currentTimeMillis();
 					webCam.read(webcam_image);
-					if (!webcam_image.empty() && webCam.isOpened()) {
-						// Thread.sleep(5);
-						if(i == 0)
-							Vision.setResize(true);
-						else
-							Vision.setResize(false);
+					if (!webcam_image.empty() && webCam.isOpened())
 						Vision.vision(webcam_image, facePanel, frame, true);
 
-					} else {
-
+					else {
 						System.out.println(" --(!) No captured frame from webcam !");
+						webcam_image.dump();
+						Vision.vision(new Mat(1, 1, CvType.CV_8UC3, new Scalar(255, 255, 255)), facePanel, frame,
+								false);
 						webCam.release();
-						frame.dispose();
-						Thread.sleep(50);
-						main(null);
+						webCam.open(0);
+						Thread.sleep(1000);// Initialization delay
 					}
 					if (debugModeEnabled)
 						break;
-					i++;
+
 				}
 
 			} else if (debugModeEnabled == true) {
-				Mat m =  Highgui.imread(debugButtonWindow.getPath(), Highgui.CV_LOAD_IMAGE_COLOR);
+				currentMode = Mode.Debug;
+				Mat m = Highgui.imread(debugButtonWindow.getPath(), Highgui.CV_LOAD_IMAGE_COLOR);
 				Vision.vision(m, facePanel, frame, false);
 			}
+			lastMode = currentMode;
 		}
 	}
-	
+
 	public static void setDebugMode(boolean enabled) {
 		debugModeEnabled = enabled;
 	}
+
 	public static double getSysProcessStartTime() {
-		return sysProcessStartTime; 
+		return sysProcessStartTime;
 	}
+
 	public static int getFrameCount() {
 		return frameCount;
 	}
-	
+
 	@Override
-	//Run guimain when the options button is pressed
+	// Run guimain when the options button is pressed
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == optionsButton) {
