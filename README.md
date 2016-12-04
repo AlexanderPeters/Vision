@@ -37,3 +37,4 @@ The code currently allows for a webcam to be streamed, filtered, denoised, and t
 determine the location of the camera relative to the retroreflective tape goal described here. https://static1.squarespace.com/static/5660f08ee4b02bc8dd3e4879/t/5696e22b1c121044d442eff0/1452728893521/
 The code has a fully fleshed out user interface to allow for easy modification of image filters while viewing before and after video streams aswell as a new debug feature which will allow users to analyze one image at a time.
 -Note: the code also has accidental camera disconnect protections so that at anytime if the camera is temporarily disconnected once reinserted video processing shoudl recommence automatically.
+-NEW FEATURE RELEASE (The ability to take snapshots of the display has been added)
