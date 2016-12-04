@@ -121,9 +121,7 @@ public class guiMain extends JFrame implements ActionListener, ChangeListener, W
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(labelHueMin)
 						.addComponent(txtHueMin).addComponent(labelSaturationMin).addComponent(txtSaturationMin)
-						.addComponent(labelValueMin).addComponent(txtValueMin)
-
-				)
+						.addComponent(labelValueMin).addComponent(txtValueMin))
 
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(sldLabelHueMin)
 						.addComponent(sldHueMin).addComponent(sldLabelSaturationMin).addComponent(sldSaturationMin)

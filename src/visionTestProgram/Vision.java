@@ -24,6 +24,7 @@ public class Vision {
 	private static double frameCount;
 	private static double sysProcessStartTime;
 	private static boolean resize;
+	private static Mat displayable = new Mat();
 	public static void vision(Mat m, FacePanel facePanel, JFrame frame, Boolean withFPS) throws InterruptedException {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int width = (int) screenSize.getWidth();
@@ -32,7 +33,7 @@ public class Vision {
 		DecimalFormat format = new DecimalFormat("0.##");	
 		double sysProcessEndTime;
 		
-		Mat displayable = new Mat();
+		
 		Mat frameHSV = new Mat(640, 480, CvType.CV_8UC3);
 		Mat frame_threshed = new Mat(640, 480, CvType.CV_8UC1);
 		Mat imageHSV_threshed = new Mat();
@@ -91,5 +92,8 @@ public class Vision {
 	}
 	public static void setResize(boolean var) {
 		resize = var;
+	}
+	public static Mat getFrame() {
+		return displayable;		
 	}
 }

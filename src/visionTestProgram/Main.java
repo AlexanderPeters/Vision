@@ -3,24 +3,24 @@ package visionTestProgram;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+//import java.awt.event.MouseEvent;
+//import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
+//import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+//import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfInt;
+//import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -28,7 +28,7 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.Video;
+//import org.opencv.video.Video;
 
 import java.net.*;
 import java.text.DecimalFormat;
@@ -314,6 +314,7 @@ public class Main implements ActionListener {
 	JButton optionsButton = new JButton("Options");
 	JButton debugOnButton = new JButton("Debug On // Load New Image");
 	JButton debugOffButton = new JButton("Debug Off");
+	JButton snapShotButton = new JButton("Take Snapshot");
 	private static boolean debugModeEnabled = false;
 	private static double sysProcessStartTime;
 	private static int frameCount = 0;
@@ -351,21 +352,31 @@ public class Main implements ActionListener {
 		}
 
 		JFrame frame = new JFrame("WebCam Capture - FRC Vision");
-		JPanel mainPanel = new JPanel(new BorderLayout());
-
+		JPanel mainPanel = new JPanel();
+		GroupLayout layout = new GroupLayout(mainPanel);
+		mainPanel.setLayout(layout);
+		
 		optionsButton.addActionListener(this);
 		debugOnButton.addActionListener(this);
 		debugOffButton.addActionListener(this);
+		snapShotButton.addActionListener(this);
 
 		FacePanel facePanel = new FacePanel();
 		frame.setLayout(new BorderLayout());
 		frame.setSize(400, 400);
 		frame.setBackground(Color.BLUE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(snapShotButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(debugOnButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(debugOffButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(optionsButton)));
+			
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(snapShotButton)
+						.addComponent(debugOnButton).addComponent(debugOffButton).addComponent(optionsButton)));
 
-		mainPanel.add(optionsButton, BorderLayout.EAST);
-		mainPanel.add(debugOnButton, BorderLayout.CENTER);
-		mainPanel.add(debugOffButton, BorderLayout.WEST);
 
 		frame.add(facePanel, BorderLayout.CENTER);
 		frame.add(mainPanel, BorderLayout.SOUTH);
@@ -453,6 +464,10 @@ public class Main implements ActionListener {
 		}
 		if (e.getSource() == debugOffButton) {
 			debugModeEnabled = false;
+		}
+		if (e.getSource() == snapShotButton) {
+			snapShotButton button = new snapShotButton();
+			Highgui.imwrite(button.getPath(), Vision.getFrame());					
 		}
 
 	}
